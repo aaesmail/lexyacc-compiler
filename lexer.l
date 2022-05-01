@@ -20,8 +20,14 @@ unaryOp "++"|"--"
 "void"                          { return VOID; }
 "return"                        { return RETURN; }
 "for"                           { return FOR; }
+"while"                         { return WHILE; }
+"do"                            { return DO; }
 "if"                            { return IF; }
 "else"                          { return ELSE; }
+"switch"                        { return SWITCH; }
+"case"                          { return CASE; }
+"break"                         { return BREAK; }
+"default"                       { return DEFAULT; }
 ^"#include"[ ]*<.+\.h>          { return INCLUDE; }
 "true"                          { return TRUE; }
 "false"                         { return FALSE; }
@@ -39,8 +45,8 @@ unaryOp "++"|"--"
 "||"                            { return OR; }
 "+"                             { return ADD; }
 "-"                             { return SUB; }
-"/"                             { return DIV; }
 "*"                             { return MULT; }
+"/"                             { return DIV; }
 \/\/.*                          { ; }
 \/\*(.*\n)*.*\*\/               { ; }
 [ \t]*                          { ; }

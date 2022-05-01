@@ -9,12 +9,15 @@
       int yywrap();
 %}
 
-%token PRINTFF SCANFF CONST INT FLOAT CHAR VOID RETURN FOR IF ELSE INCLUDE TRUE FALSE NUMBER FLOAT_NUM ID UNARY LE GE EQ NE GT LT AND OR ADD SUB DIV MULT STR CHARACTER
+%token PRINTFF SCANFF CONST INT FLOAT CHAR VOID RETURN FOR WHILE DO IF ELSE SWITCH CASE BREAK DEFAULT INCLUDE TRUE FALSE NUMBER FLOAT_NUM ID UNARY LE GE EQ NE GT LT AND OR ADD SUB MULT DIV STR CHARACTER
+
+%left ADD SUB
+%left MULT DIV
 
 %%
 
 program:    
-          headers main '(' ')' '{' body return '}'    { printf("wutwutwut"); }
+          headers main '(' ')' '{' body return '}'
           ;
 
 headers:    
@@ -34,12 +37,26 @@ datatype:
           ;
 
 body:
-          FOR '(' statement ';' condition ';' statement ')' '{' body '}' 
+          FOR '(' statement ';' condition ';' statement ')' '{' body '}'
+          | WHILE '(' condition ')' '{' body '}'
+          | DO '{' body '}' WHILE '(' condition ')' ';'
           | IF '(' condition ')' '{' body '}' else
+          | SWITCH '(' value ')' '{' switchBody '}'
           | statement ';'
           | body body
           | PRINTFF '(' STR ')' ';'
           | SCANFF '(' STR ',' '&' ID ')' ';'
+          ;
+
+switchBody:
+          CASE value ':' body optionalBreak
+          | DEFAULT ':' body optionalBreak
+          | switchBody switchBody
+          ;
+
+optionalBreak:
+          BREAK ';'
+          |
           ;
 
 else:
