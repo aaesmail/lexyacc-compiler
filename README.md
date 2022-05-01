@@ -2,7 +2,7 @@
 A C like language compiler made using lex &amp; yacc
 
 Run:
-- Have a lex and yacc parsers and a C compiler installed and added to environment variables
+- Have a lex and yacc parsers and a C compiler installed
 - yacc –d parser.y
 - lex lexer.l
 - gcc lex.yy.c y.tab.c -o compiler.exe
