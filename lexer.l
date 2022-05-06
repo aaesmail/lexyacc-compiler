@@ -11,14 +11,10 @@ unaryOp "++"|"--"
 
 %%
 
-"printf"                        { return PRINTFF; }
-"scanf"                         { return SCANFF; }
 "const"                         { return CONST; }
 "int"                           { return INT; }
 "float"                         { return FLOAT; }
 "char"                          { return CHAR; }
-"void"                          { return VOID; }
-"return"                        { return RETURN; }
 "for"                           { return FOR; }
 "while"                         { return WHILE; }
 "do"                            { return DO; }
@@ -28,13 +24,17 @@ unaryOp "++"|"--"
 "case"                          { return CASE; }
 "break"                         { return BREAK; }
 "default"                       { return DEFAULT; }
-^"#include"[ ]*<.+\.h>          { return INCLUDE; }
-"true"                          { return TRUE; }
-"false"                         { return FALSE; }
 [-]?{number}+                   { return NUMBER; }
 [-]?{number}+\.{number}{1,6}    { return FLOAT_NUM; }
 {letter}({letter}|{number})*    { return ID; }
 {unaryOp}                       { return UNARY; }
+"="                             { return ASSIGNMENT; }
+":"                             { return COLON; }
+";"                             { return SEMI; }
+"("                             { return OPENING_BRACKET; }
+")"                             { return CLOSING_BRACKET; }
+"{"                             { return OPENING_BRACES; }
+"}"                             { return CLOSING_BRACES; }
 "<="                            { return LE; }
 ">="                            { return GE; }
 "=="                            { return EQ; }
@@ -43,6 +43,7 @@ unaryOp "++"|"--"
 "<"                             { return LT; }
 "&&"                            { return AND; }
 "||"                            { return OR; }
+"!"                             { return NOT; }
 "+"                             { return ADD; }
 "-"                             { return SUB; }
 "*"                             { return MULT; }
@@ -52,7 +53,6 @@ unaryOp "++"|"--"
 [ \t]*                          { ; }
 [\n]                            { lineNumber++; }
 .                               { return *yytext; }
-["].*["]                        { return STR; }
 ['].[']                         { return CHARACTER; }
 
 %%
