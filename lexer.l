@@ -1,6 +1,6 @@
 %{
     #include "y.tab.h"
-    int lineNumber = 0;
+    int lineNumber = 1;
 %}
 
 %option yylineno
@@ -20,6 +20,7 @@ unaryOp "++"|"--"
 "do"                            { return DO; }
 "if"                            { return IF; }
 "else"                          { return ELSE; }
+"elif"                          { return ELIF; }
 "switch"                        { return SWITCH; }
 "case"                          { return CASE; }
 "break"                         { return BREAK; }
@@ -28,13 +29,6 @@ unaryOp "++"|"--"
 [-]?{number}+\.{number}{1,6}    { return FLOAT_NUM; }
 {letter}({letter}|{number})*    { return ID; }
 {unaryOp}                       { return UNARY; }
-"="                             { return ASSIGNMENT; }
-":"                             { return COLON; }
-";"                             { return SEMI; }
-"("                             { return OPENING_BRACKET; }
-")"                             { return CLOSING_BRACKET; }
-"{"                             { return OPENING_BRACES; }
-"}"                             { return CLOSING_BRACES; }
 "<="                            { return LE; }
 ">="                            { return GE; }
 "=="                            { return EQ; }
