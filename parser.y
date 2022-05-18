@@ -154,6 +154,16 @@ void yyerror(char *s) {
 }
 
 int main(void) {
+  fptr = fopen("./program.out", "w");
+
+  if (fptr == NULL) {
+    printf("Couldn't open file!");
+    exit(1);
+  }
+
   yyparse();
+
+  fclose(fptr);
+
   return 0;
 }
