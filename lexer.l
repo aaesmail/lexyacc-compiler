@@ -1,56 +1,44 @@
 %{
+    #include <stdlib.h>
+    #include "utility.h"
     #include "y.tab.h"
-    int lineNumber = 1;
+
+    void yyerror(char *);
 %}
 
 %option yylineno
 
-letter [a-zA-Z]
-number [0-9]
-unaryOp "++"|"--"
-
 %%
 
-"const"                         { return CONST; }
-"int"                           { return INT; }
-"float"                         { return FLOAT; }
-"char"                          { return CHAR; }
-"for"                           { return FOR; }
-"while"                         { return WHILE; }
-"do"                            { return DO; }
-"if"                            { return IF; }
-"else"                          { return ELSE; }
-"elif"                          { return ELIF; }
-"switch"                        { return SWITCH; }
-"case"                          { return CASE; }
-"break"                         { return BREAK; }
-"default"                       { return DEFAULT; }
-[-]?{number}+                   { return NUMBER; }
-[-]?{number}+\.{number}{1,6}    { return FLOAT_NUM; }
-{letter}({letter}|{number})*    { return ID; }
-{unaryOp}                       { return UNARY; }
-"<="                            { return LE; }
+[a-z]                           {
+                                  yylval.sIndex = *yytext - 'a';
+                                  return VARIABLE;
+                                }
+
+[0-9]+                          {
+                                  yylval.iValue = atoi(yytext);
+                                  return INTEGER;
+                                }
+
+[-()<>=+*/;{}.]                 {
+                                  return *yytext;
+                                }
+
 ">="                            { return GE; }
+"<="                            { return LE; }
 "=="                            { return EQ; }
 "!="                            { return NE; }
-">"                             { return GT; }
-"<"                             { return LT; }
-"&&"                            { return AND; }
-"||"                            { return OR; }
-"!"                             { return NOT; }
-"+"                             { return ADD; }
-"-"                             { return SUB; }
-"*"                             { return MULT; }
-"/"                             { return DIV; }
-\/\/.*                          { ; }
-\/\*(.*\n)*.*\*\/               { ; }
-[ \t]*                          { ; }
-[\n]                            { lineNumber++; }
-.                               { return *yytext; }
-['].[']                         { return CHARACTER; }
+"do"                            { return DO; }
+"while"                         { return WHILE; }
+"if"                            { return IF; }
+"else"                          { return ELSE; }
+"print"                         { return PRINT; }
+
+[ \t\n]+                        { ; }
+
+.                               { yyerror("Unknown character"); }
 
 %%
-
-int yywrap() {
+int yywrap(void) {
   return 1;
 }

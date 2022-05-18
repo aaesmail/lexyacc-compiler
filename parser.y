@@ -1,276 +1,159 @@
 %{
-      #include <stdio.h>
-      #include <string.h>
-      #include <stdlib.h>
-      #include <ctype.h>
+    #include <stdio.h>
+    #include <stdlib.h>
+    #include <stdarg.h>
+    #include "utility.h"
 
-      void yyerror(const char *s);
-      int yylex();
-      int yywrap();
-      void insertType();
-      void add(char c, char* info);
-      int search(char *type);
-      void extendSymbolTable();
+    nodeType *opr(int oper, int nops, ...);
+    nodeType *id(int i);
+    nodeType *con(int value);
 
-      typedef struct symbolTableStruct {
-        char * name;
-        char * dataType;
-        char * type;
-        int lineNo;
-      } symbolTableStruct;
-
-      int symbolTableSize = 1;
-      symbolTableStruct* symbolTable;
-
-      int count = 0;
-      int q;
-      char type[10];
-      extern int yylineno;
-      extern char * yytext;
+    void freeNode(nodeType *p);
+    int ex(nodeType *p);
+    int yylex(void);
+    void yyerror(char *s);
+    int sym[26];
 %}
 
-%token CONST INT FLOAT CHAR
-%token NUMBER FLOAT_NUM CHARACTER ID
-%token FOR WHILE DO
-%token IF ELSE ELIF SWITCH CASE BREAK DEFAULT
-%token UNARY
-%token LE GE EQ NE GT LT AND OR NOT
-%token ADD SUB MULT DIV
+%union {
+  int iValue;
+  char sIndex;
+  nodeType *nPtr;
+};
 
-%left ADD SUB
-%left MULT DIV
+%token <iValue> INTEGER
+%token <sIndex> VARIABLE
+%token DO WHILE IF PRINT
+%nonassoc IFX
+%nonassoc ELSE
 
-%start program
+%left GE LE EQ NE '>' '<'
+%left '+' '-'
+%left '*' '/'
+%nonassoc UMINUS
 
-%%
-
-program
-          : statement
-          | program statement
-          ;
-
-statement
-          : assignments ';'
-          | expression ';'
-          | ifStatement
-          | switchStatement
-          | forLoop
-          | whileLoop
-          | doWhileLoop
-          ;
-
-assignments
-          : type ID { add('V', "N/A"); } assignmOpt
-          | CONST type ID { add('C', "N/A"); } assignmOpt
-          | ID '=' expression
-          ;
-
-assignmOpt
-          : '=' expression
-          |
-          ;
-
-expression
-          : expression ADD term
-          | expression SUB term
-          | expression LE term
-          | expression GE term
-          | expression EQ term
-          | expression NE term
-          | expression GT term
-          | expression LT term
-          | expression AND term
-          | expression OR term
-          | term
-          ;
-
-term
-          : term MULT factor
-          | term DIV factor
-          | factor
-          | NOT factor
-          ;
-
-factor
-          : ID
-          | UNARY ID
-          | ID UNARY
-          | NUMBER { add('L', "int"); }
-          | FLOAT_NUM { add('L', "float"); }
-          | CHARACTER { add('L', "char"); }
-          | '(' expression ')'
-          ;
-
-type
-          : INT { insertType(); }
-          | FLOAT { insertType(); }
-          | CHAR { insertType(); }
-          ;
-
-ifStatement
-          : IF { add('K', "N/A"); } '(' expression ')' '{' program '}' elseIfs elseStmt
-          ;
-
-elseIfs
-          : elseIfs elseIf
-          |
-          ;
-
-elseIf
-          : ELIF { add('K', "N/A"); } '(' expression ')' '{' program '}'
-          ;
-
-elseStmt
-          : ELSE { add('K', "N/A"); } '{' program '}'
-          |
-          ;
-
-forLoop
-          : FOR { add('K', "N/A"); } '(' assignments ';'
-            expression ';' expression ')'
-            '{' program '}'
-          ;
-
-whileLoop
-          : WHILE { add('K', "N/A"); } '(' expression ')'
-            '{' program '}'
-          ;
-
-doWhileLoop
-          : DO { add('K', "N/A"); } '{' program '}'
-            WHILE { add('K', "N/A"); } '(' expression ')' ';'
-          ;
-
-switchStatement
-          : SWITCH { add('K', "N/A"); } '(' ID ')'
-            '{' caseStatement '}'
-          ;
-
-caseStatement
-          : caseStatement caseBody
-          |
-          ;
-
-caseBody
-          : CASE { add('K', "N/A"); } expression ':' program breakOpt
-          | DEFAULT { add('K', "N/A"); } ':' program breakOpt
-          ;
-
-breakOpt
-          : BREAK { add('K', "N/A"); } ';'
-          |
-          ;
+%type <nPtr> stmt expr stmt_list
 
 %%
 
-int main() {
-  symbolTable = malloc(symbolTableSize * sizeof(symbolTableStruct));
+program:
+              function                          { exit(0); }
+            ;
 
-  yyparse();
+function:
+              function stmt                   { ex($2); freeNode($2); }
+            | /* NULL */
+            ;
 
-  printf("\n\n");
+stmt:
+              ';'                             { $$ = opr(';', 2, NULL, NULL); }
+            | expr ';'                        { $$ = $1; }
+            | PRINT expr ';'                  { $$ = opr(PRINT, 1, $2); }
+            | VARIABLE '=' expr ';'           { $$ = opr('=', 2, id($1), $3); }
+            | DO stmt WHILE '(' expr ')' ';'  { $$ = opr(DO, 2, $2, $5); }
+            | WHILE '(' expr ')' stmt         { $$ = opr(WHILE, 2, $3, $5); }
+            | IF '(' expr ')' stmt %prec IFX  { $$ = opr(IF, 2, $3, $5); }
+            | IF '(' expr ')' stmt ELSE stmt  { $$ = opr(IF, 3, $3, $5, $7); }
+            | '{' stmt_list '}'               { $$ = $2; }
+            ;
 
-  printf("\t\t\t\t\t\t\tSymbol Table \n\n");
-  printf("\t\t\t\tCount\tName\t\tData Type\tType\t\tLine Number");
-  printf("\n\n\t\t\t____________________________________________________________________________\n\n");
-  for (int i = 0; i < count; ++i) {
-    printf("\t\t\t\t%d\t%s\t\t%s\t\t%s\t%d\t\n", i + 1, symbolTable[i].name, symbolTable[i].dataType, symbolTable[i].type, symbolTable[i].lineNo);
-  }
+stmt_list:
+              stmt                            { $$ = $1; }
+            | stmt_list stmt                  { $$ = opr(';', 2, $1, $2); }
+            ;
 
-  printf("\n\n");
+expr:
+              INTEGER                         { $$ = con($1); }
+            | VARIABLE                        { $$ = id($1); }
+            | '-' expr %prec UMINUS           { $$ = opr(UMINUS, 1, $2); }
+            | expr '+' expr                   { $$ = opr('+', 2, $1, $3); }
+            | expr '-' expr                   { $$ = opr('-', 2, $1, $3); }
+            | expr '*' expr                   { $$ = opr('*', 2, $1, $3); }
+            | expr '/' expr                   { $$ = opr('/', 2, $1, $3); }
+            | expr '<' expr                   { $$ = opr('<', 2, $1, $3); }
+            | expr '>' expr                   { $$ = opr('>', 2, $1, $3); }
+            | expr GE expr                    { $$ = opr(GE, 2, $1, $3); }
+            | expr LE expr                    { $$ = opr(LE, 2, $1, $3); }
+            | expr NE expr                    { $$ = opr(NE, 2, $1, $3); }
+            | expr EQ expr                    { $$ = opr(EQ, 2, $1, $3); }
+            | '(' expr ')'                    { $$ = $2; }
+            ;
+
+%%
+
+#define SIZEOF_NODETYPE ((char *)&p->con - (char *)p)
+
+nodeType *con(int value) {
+  nodeType *p;
+  size_t nodeSize;
+
+  nodeSize = SIZEOF_NODETYPE + sizeof(conNodeType);
+
+  if ((p = malloc(nodeSize)) == NULL)
+    yyerror("Out of memory!");
+
+  p->type = typeCon;
+  p->con.value = value;
+
+  return p;
 }
 
-void yyerror(const char* msg) {
-  fprintf(stderr, "%s\n", msg);
+nodeType *id(int i) {
+  nodeType *p;
+  size_t nodeSize;
+
+  nodeSize = SIZEOF_NODETYPE + sizeof(idNodeType);
+
+  if ((p = malloc(nodeSize)) == NULL)
+    yyerror("Out of memory!");
+
+  p->type = typeId;
+  p->id.i = i;
+
+  return p;
 }
 
-void insertType() {
-  strcpy(type, yytext);
-}
-
-void add(char c, char* info) {
-  // q = search(yytext);
-
-  if (q) return;
-
-  if (count == symbolTableSize) extendSymbolTable();
-
-  switch(c) {
-    case 'H':
-      symbolTable[count].name = strdup(yytext);
-      symbolTable[count].dataType = strdup(type);
-      symbolTable[count].lineNo = yylineno;
-      symbolTable[count].type = strdup("Header");
-      ++count;
-      break;
-
-    case 'K':
-      symbolTable[count].name = strdup(yytext);
-      symbolTable[count].dataType = strdup("N/A");
-      symbolTable[count].lineNo = yylineno;
-      symbolTable[count].type = strdup("Keyword\t");
-      ++count;
-      break;
-
-    case 'V':
-      symbolTable[count].name = strdup(yytext);
-      symbolTable[count].dataType = strdup(type);
-      symbolTable[count].lineNo = yylineno;
-      symbolTable[count].type = strdup("Variable");
-      ++count;
-      break;
-
-    case 'C':
-      symbolTable[count].name = strdup(yytext);
-      symbolTable[count].dataType = strdup(type);
-      symbolTable[count].lineNo = yylineno;
-      symbolTable[count].type = strdup("Constant");
-      ++count;
-      break;
-
-    case 'L':
-      symbolTable[count].name = strdup(yytext);
-      symbolTable[count].dataType = strdup(info);
-      symbolTable[count].lineNo = yylineno;
-      symbolTable[count].type = strdup("Literal\t");
-      ++count;
-      break;
-
-    case 'F':
-      symbolTable[count].name = strdup(yytext);
-      symbolTable[count].dataType = strdup(type);
-      symbolTable[count].lineNo = yylineno;
-      symbolTable[count].type = strdup("Function");
-      ++count;
-      break;
-
-    default:
-      break;
-  }
-}
-
-int search(char *type) {
+nodeType *opr(int oper, int nops, ...) {
+  va_list ap;
+  nodeType *p;
+  size_t nodeSize;
   int i;
 
-  for (i = count - 1; i >= 0; --i) {
-    if (strcmp(symbolTable[i].name, type) == 0) {
-      return -1;
-      break;
-    }
-  }
+  nodeSize = SIZEOF_NODETYPE + sizeof(oprNodeType) + ((nops - 1) * sizeof(nodeType*));
 
-  return 0;
+  if ((p = malloc(nodeSize)) == NULL)
+    yyerror("Out of memory!");
+
+  p->type = typeOpr;
+  p->opr.oper = oper;
+  p->opr.nops = nops;
+
+  va_start(ap, nops);
+  for (i = 0; i < nops; i++)
+    p->opr.op[i] = va_arg(ap, nodeType*);
+  va_end(ap);
+
+  return p;
 }
 
-void extendSymbolTable() {
-  symbolTableSize *= 2;
-  symbolTableStruct* tempTable = malloc(symbolTableSize * sizeof(symbolTableStruct));
+void freeNode(nodeType *p) {
+  int i;
 
-  for (int i = 0; i < count; ++i) {
-    tempTable[i] = symbolTable[i];
+  if (!p) return;
+
+  if (p->type == typeOpr) {
+    for (i = 0; i < p->opr.nops; i++)
+      freeNode(p->opr.op[i]);
   }
 
-  symbolTableStruct* tempTable2 = symbolTable;
-  symbolTable = tempTable;
-  free(tempTable2);
+  free(p);
+}
+
+void yyerror(char *s) {
+  fprintf(stdout, "%s\n", s);
+}
+
+int main(void) {
+  yyparse();
+  return 0;
 }

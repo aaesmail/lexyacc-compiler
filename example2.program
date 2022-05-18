@@ -1,0 +1,15 @@
+y = 5;
+x = 3;
+x + y;
+
+i = 0;
+
+while (i < 5) {
+  print i;
+  i = i + 1;
+}
+
+do {
+  print i;
+  i = i - 1;
+} while(i > 0);
