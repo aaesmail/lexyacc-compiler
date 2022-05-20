@@ -23,7 +23,7 @@
 
 %token <iValue> INTEGER
 %token <sIndex> VARIABLE
-%token DO WHILE IF PRINT
+%token DO WHILE IF SWITCH CASE DEFAULT BREAK PRINT
 %nonassoc IFX
 %nonassoc ELSE
 
@@ -32,7 +32,7 @@
 %left '*' '/'
 %nonassoc UMINUS
 
-%type <nPtr> stmt expr stmt_list
+%type <nPtr> stmt expr stmt_list switch_body case_stmt
 
 %%
 
@@ -54,12 +54,23 @@ stmt:
             | WHILE '(' expr ')' stmt         { $$ = opr(WHILE, 2, $3, $5); }
             | IF '(' expr ')' stmt %prec IFX  { $$ = opr(IF, 2, $3, $5); }
             | IF '(' expr ')' stmt ELSE stmt  { $$ = opr(IF, 3, $3, $5, $7); }
+            | SWITCH '(' VARIABLE ')' '{' switch_body '}' { $$ = opr(SWITCH, 2, id($3), $6); }
             | '{' stmt_list '}'               { $$ = $2; }
             ;
 
 stmt_list:
               stmt                            { $$ = $1; }
             | stmt_list stmt                  { $$ = opr(';', 2, $1, $2); }
+            ;
+
+switch_body:
+              case_stmt                       { $$ = $1; }
+            | switch_body case_stmt           { $$ = opr(';', 2, $1, $2); }
+            ;
+
+case_stmt:
+              CASE expr ':' stmt BREAK ';'    { $$ = opr(CASE, 2, $2, $4); }
+            | DEFAULT ':' stmt BREAK ';'      { $$ = opr(DEFAULT, 1, $3); }
             ;
 
 expr:

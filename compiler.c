@@ -4,6 +4,9 @@
 
 static int lbl;
 
+static char switchVar;
+static int switchLbl;
+
 int ex(nodeType *p) {
   int lbl1, lbl2;
 
@@ -50,6 +53,28 @@ int ex(nodeType *p) {
             ex(p->opr.op[1]);
             fprintf(fptr, "L%03d:\n", lbl1);
           }
+          break;
+
+        case SWITCH:
+          switchVar = p->opr.op[0]->id.i + 'a';
+          switchLbl = lbl++;
+          ex(p->opr.op[1]);
+          fprintf(fptr, "L%03d:\n", switchLbl);
+          break;
+
+        case CASE:
+          ex(p->opr.op[0]);
+          fprintf(fptr, "\tpush\t%c\n", switchVar);
+          fprintf(fptr, "\tcmpEQ\n");
+          fprintf(fptr, "\tjz\tL%03d\n", lbl1 = lbl++);
+          ex(p->opr.op[1]);
+          fprintf(fptr, "\tjmp\tL%03d\n", switchLbl);
+          fprintf(fptr, "L%03d:\n", lbl1);
+          break;
+
+        case DEFAULT:
+          ex(p->opr.op[0]);
+          fprintf(fptr, "\tjmp\tL%03d\n", switchLbl);
           break;
 
         case PRINT:

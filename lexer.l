@@ -20,7 +20,7 @@
                                   return INTEGER;
                                 }
 
-[-()<>=+*/;{}.]                 {
+[-()<>=+*/:;{}.]                 {
                                   return *yytext;
                                 }
 
@@ -32,6 +32,10 @@
 "while"                         { return WHILE; }
 "if"                            { return IF; }
 "else"                          { return ELSE; }
+"switch"                        { return SWITCH; }
+"case"                          { return CASE; }
+"default"                       { return DEFAULT; }
+"break"                         { return BREAK; }
 "print"                         { return PRINT; }
 
 [ \t\n]+                        { ; }

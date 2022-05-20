@@ -13,3 +13,17 @@ do {
   print i;
   i = i - 1;
 } while(i > 0);
+
+switch (x) {
+  case 5:
+    print x;
+    break;
+  
+  case 6:
+    print y;
+    break;
+  
+  default:
+    print x + y;
+    break;
+}
