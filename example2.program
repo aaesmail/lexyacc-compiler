@@ -1,6 +1,9 @@
 int ybc;
 char k;
 float c;
+const int i = 5;
+const float m = 1.5;
+const char j = 'c';
 ybc = 5;
 x = 3;
 y = 3;

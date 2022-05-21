@@ -1,4 +1,3 @@
-- variable types
-- constant vars
+- Track lineNo error
 - error handler
 - semantic errors
