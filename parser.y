@@ -6,7 +6,7 @@
     #include "utility.h"
 
     nodeType *opr(char *name, int oper, int nops, ...);
-    nodeType *id(char *name, int i, varType type);
+    nodeType *id(char *name, varType type);
     nodeType *con(int value, varType type);
 
     void initSymTable();
@@ -28,7 +28,7 @@
 
 %union {
   int iValue;
-  char sIndex;
+  char *sIndex;
   nodeType *nPtr;
 };
 
@@ -60,12 +60,12 @@ stmt:
               ';'                             { $$ = opr("NA", ';', 2, NULL, NULL); }
             | expr ';'                        { $$ = $1; }
             | PRINT expr ';'                  { $$ = opr("print", PRINT, 1, $2); }
-            | VARIABLE '=' expr ';'           { $$ = opr("assign", '=', 2, id("var", $1, INT), $3); }
+            | VARIABLE '=' expr ';'           { $$ = opr("assign", '=', 2, id($1, INT), $3); }
             | DO stmt WHILE '(' expr ')' ';'  { $$ = opr("do", DO, 2, $2, $5); }
             | WHILE '(' expr ')' stmt         { $$ = opr("while", WHILE, 2, $3, $5); }
             | IF '(' expr ')' stmt %prec IFX  { $$ = opr("if", IF, 2, $3, $5); }
             | IF '(' expr ')' stmt ELSE stmt  { $$ = opr("if else", IF, 3, $3, $5, $7); }
-            | SWITCH '(' VARIABLE ')' '{' switch_body '}' { $$ = opr("switch", SWITCH, 2, id("var", $3, PK), $6); }
+            | SWITCH '(' VARIABLE ')' '{' switch_body '}' { $$ = opr("switch", SWITCH, 2, id($3, PK), $6); }
             | '{' stmt_list '}'               { $$ = $2; }
             ;
 
@@ -86,7 +86,7 @@ case_stmt:
 
 expr:
               INTEGER                         { $$ = con($1, INT); }
-            | VARIABLE                        { $$ = id("var", $1, PK); }
+            | VARIABLE                        { $$ = id($1, PK); }
             | '-' expr %prec UMINUS           { $$ = opr("negative", UMINUS, 1, $2); }
             | expr '+' expr                   { $$ = opr("add", '+', 2, $1, $3); }
             | expr '-' expr                   { $$ = opr("sub", '-', 2, $1, $3); }
@@ -122,7 +122,7 @@ nodeType *con(int value, varType type) {
   return p;
 }
 
-nodeType *id(char *name, int i, varType type) {
+nodeType *id(char *name, varType type) {
   nodeType *p;
   size_t nodeSize;
   int locInSym;
@@ -133,7 +133,7 @@ nodeType *id(char *name, int i, varType type) {
     yyerror("Out of memory!");
 
   p->type = typeId;
-  p->id.i = i;
+  p->id.name = strdup(name);
   p->id.type = type;
 
   locInSym = searchForId(name);
@@ -147,7 +147,7 @@ nodeType *id(char *name, int i, varType type) {
   }
 
   if (locInSym != -1) {
-    p->id.type = sym[i].id.type;
+    p->id.type = sym[locInSym].id.type;
   }
 
   return p;

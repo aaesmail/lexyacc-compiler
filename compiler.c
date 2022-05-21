@@ -6,7 +6,7 @@
 
 static int lbl;
 
-static char switchVar;
+static char *switchVar;
 static int switchLbl;
 
 int ex(nodeType *p) {
@@ -20,7 +20,7 @@ int ex(nodeType *p) {
       break;
 
     case typeId:
-      fprintf(fptr, "\tpush\t%c\n", p->id.i + 'a');
+      fprintf(fptr, "\tpush\t%s\n", p->id.name);
       break;
 
     case typeOpr:
@@ -58,7 +58,7 @@ int ex(nodeType *p) {
           break;
 
         case SWITCH:
-          switchVar = p->opr.op[0]->id.i + 'a';
+          switchVar = p->opr.op[0]->id.name;
           switchLbl = lbl++;
           ex(p->opr.op[1]);
           fprintf(fptr, "L%03d:\n", switchLbl);
@@ -66,7 +66,7 @@ int ex(nodeType *p) {
 
         case CASE:
           ex(p->opr.op[0]);
-          fprintf(fptr, "\tpush\t%c\n", switchVar);
+          fprintf(fptr, "\tpush\t%s\n", switchVar);
           fprintf(fptr, "\tcmpEQ\n");
           fprintf(fptr, "\tjz\tL%03d\n", lbl1 = lbl++);
           ex(p->opr.op[1]);
@@ -86,7 +86,7 @@ int ex(nodeType *p) {
 
         case '=':
           ex(p->opr.op[1]);
-          fprintf(fptr, "\tpop\t%c\n", p->opr.op[0]->id.i + 'a');
+          fprintf(fptr, "\tpop\t%s\n", p->opr.op[0]->id.name);
           break;
 
         case UMINUS:
@@ -271,7 +271,7 @@ void printSymTable() {
     if (sym[i].type == typeCon) {
       printf("%d", sym[i].con.value);
     } else if (sym[i].type == typeId) {
-      printf("%d", sym[i].id.intVal);
+      printf("%s", "NA");
     } else if (sym[i].type == typeOpr) {
       printf("%s", "NA");
     } else {

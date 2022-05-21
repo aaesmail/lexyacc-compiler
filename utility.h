@@ -8,7 +8,7 @@ typedef struct {
 
 // id
 typedef struct {
-  int i;
+  char *name;
   varType type;
 } idNodeType;
 
@@ -37,12 +37,6 @@ typedef struct {
 typedef struct {
   char *name;
   varType type;
-
-  union {
-    int intVal;
-    char charVal;
-    float floatVal;
-  };
 } idSymTable;
 
 typedef struct {

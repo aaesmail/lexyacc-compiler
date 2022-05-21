@@ -1,5 +1,6 @@
 %{
     #include <stdlib.h>
+    #include <string.h>
     #include "utility.h"
     #include "y.tab.h"
 
@@ -9,20 +10,6 @@
 %option yylineno
 
 %%
-
-[a-z]                           {
-                                  yylval.sIndex = *yytext - 'a';
-                                  return VARIABLE;
-                                }
-
-[0-9]+                          {
-                                  yylval.iValue = atoi(yytext);
-                                  return INTEGER;
-                                }
-
-[-()<>=+*/:;{}.]                 {
-                                  return *yytext;
-                                }
 
 ">="                            { return GE; }
 "<="                            { return LE; }
@@ -37,6 +24,20 @@
 "default"                       { return DEFAULT; }
 "break"                         { return BREAK; }
 "print"                         { return PRINT; }
+
+[a-zA-Z][0-9a-zA-Z]*            {
+                                  yylval.sIndex = strdup(yytext);
+                                  return VARIABLE;
+                                }
+
+[0-9]+                          {
+                                  yylval.iValue = atoi(yytext);
+                                  return INTEGER;
+                                }
+
+[-()<>=+*/:;{}.]                 {
+                                  return *yytext;
+                                }
 
 [ \t\n]+                        { ; }
 
