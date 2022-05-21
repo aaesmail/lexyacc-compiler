@@ -1,5 +1,5 @@
 typedef enum { typeCon, typeId, typeOpr } nodeEnum;
-typedef enum { PK, INT, CHARAC } varType;
+typedef enum { PK, INT, CHARAC, FLOAT } varType;
 
 // constant
 typedef struct {
@@ -8,6 +8,7 @@ typedef struct {
   union {
     int intVal;
     char charVal;
+    double floatVal;
   };
 } conNodeType;
 
@@ -40,6 +41,7 @@ typedef struct {
   union {
     int intVal;
     char charVal;
+    double floatVal;
   };
 } conSymTable;
 

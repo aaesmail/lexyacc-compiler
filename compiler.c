@@ -159,6 +159,10 @@ void printConstant(conNodeType con) {
       fprintf(fptr, "%c", con.charVal);
       break;
 
+    case FLOAT:
+      fprintf(fptr, "%.6f", con.floatVal);
+      break;
+
     default:
       fprintf(fptr, "ERROR");
       break;
@@ -180,7 +184,7 @@ void destroySymTable() {
   free(sym);
 }
 
-void addConToSymTable(int intVal, char charVal, varType type, int lineNo) {
+void addConToSymTable(int intVal, char charVal, double floatVal, varType type, int lineNo) {
   if (symTableSize == symTableIndex) {
     extendSymTable();
   }
@@ -189,6 +193,8 @@ void addConToSymTable(int intVal, char charVal, varType type, int lineNo) {
     sym[symTableIndex].con.intVal = intVal;
   } else if (type == CHARAC) {
     sym[symTableIndex].con.charVal = charVal;
+  } else if (type == FLOAT) {
+    sym[symTableIndex].con.floatVal = floatVal;
   }
 
   sym[symTableIndex].con.type = type;
@@ -241,6 +247,8 @@ void printVarType(varType type) {
     printf("%s", "int");
   } else if (type == CHARAC) {
     printf("%s", "char");
+  } else if (type == FLOAT) {
+    printf("%s", "float");
   } else {
     printf("ERROR");
   }
@@ -251,6 +259,8 @@ void printConstSym(conSymTable con) {
     printf("%d", con.intVal);
   } else if (con.type == CHARAC) {
     printf("%c", con.charVal);
+  } else if (con.type == FLOAT) {
+    printf("%.6f", con.floatVal);
   } else {
     printf("ERROR");
   }

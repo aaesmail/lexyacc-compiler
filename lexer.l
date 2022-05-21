@@ -35,9 +35,14 @@
                                   return INTEGER;
                                 }
 
+[0-9]+\.[0-9]+                  {
+                                  yylval.fValue = atof(yytext);
+                                  return FLOAT_NUM;
+                                }
+
 ['].[']                         {
                                   yylval.cValue = yytext[1];
-                                  return CHAR;
+                                  return CHARACTER;
                                 } 
 
 [-()<>=+*/:;{}.]                {

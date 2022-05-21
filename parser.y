@@ -7,12 +7,12 @@
 
     nodeType *opr(char *name, int oper, int nops, ...);
     nodeType *id(char *name, varType type);
-    nodeType *con(int intVal, char charVal, varType type);
+    nodeType *con(int intVal, char charVal, double floatVal, varType type);
 
     void initSymTable();
     void extendSymTable();
     void destroySymTable();
-    void addConToSymTable(int intVal, char charVal, varType type, int lineNo);
+    void addConToSymTable(int intVal, char charVal, double floatVal, varType type, int lineNo);
     void addIdToSymTable(char *name, varType type, int lineNo);
     void addOprToSymTable(char *name, int lineNo);
     void printSymTable();
@@ -29,12 +29,14 @@
 %union {
   int iValue;
   char cValue;
+  double fValue;
   char *sIndex;
   nodeType *nPtr;
 };
 
 %token <iValue> INTEGER
-%token <cValue> CHAR
+%token <cValue> CHARACTER
+%token <fValue> FLOAT_NUM
 %token <sIndex> VARIABLE
 %token DO WHILE IF SWITCH CASE DEFAULT BREAK PRINT
 %nonassoc IFX
@@ -87,8 +89,9 @@ case_stmt:
             ;
 
 expr:
-              INTEGER                         { $$ = con($1, '0', INT); }
-            | CHAR                            { $$ = con(0, $1, CHARAC); }
+              INTEGER                         { $$ = con($1, '0', 0.5, INT); }
+            | CHARACTER                       { $$ = con(0, $1, 0.5, CHARAC); }
+            | FLOAT_NUM                       { $$ = con(0, '0', $1, FLOAT); }
             | VARIABLE                        { $$ = id($1, PK); }
             | '-' expr %prec UMINUS           { $$ = opr("negative", UMINUS, 1, $2); }
             | expr '+' expr                   { $$ = opr("add", '+', 2, $1, $3); }
@@ -108,7 +111,7 @@ expr:
 
 #define SIZEOF_NODETYPE ((char *)&p->con - (char *)p)
 
-nodeType *con(int intVal, char charVal, varType type) {
+nodeType *con(int intVal, char charVal, double floatVal, varType type) {
   nodeType *p;
   size_t nodeSize;
 
@@ -124,9 +127,11 @@ nodeType *con(int intVal, char charVal, varType type) {
     p->con.intVal = intVal;
   } else if (type == CHARAC) {
     p->con.charVal = charVal;
+  } else if (type == FLOAT) {
+    p->con.floatVal = floatVal;
   }
 
-  addConToSymTable(intVal, charVal, type, yylineno);
+  addConToSymTable(intVal, charVal, floatVal, type, yylineno);
 
   return p;
 }
