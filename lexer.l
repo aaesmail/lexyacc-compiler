@@ -25,6 +25,10 @@
 "break"                         { return BREAK; }
 "print"                         { return PRINT; }
 
+"int"                           { return INT_TYPE; }
+"float"                         { return FLOAT_TYPE; }
+"char"                          { return CHAR_TYPE; }
+
 [a-zA-Z][0-9a-zA-Z]*            {
                                   yylval.sIndex = strdup(yytext);
                                   return VARIABLE;

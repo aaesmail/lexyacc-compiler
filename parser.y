@@ -38,7 +38,7 @@
 %token <cValue> CHARACTER
 %token <fValue> FLOAT_NUM
 %token <sIndex> VARIABLE
-%token DO WHILE IF SWITCH CASE DEFAULT BREAK PRINT
+%token DO WHILE IF SWITCH CASE DEFAULT BREAK PRINT INT_TYPE FLOAT_TYPE CHAR_TYPE
 %nonassoc IFX
 %nonassoc ELSE
 
@@ -64,7 +64,10 @@ stmt:
               ';'                             { $$ = opr("NA", ';', 2, NULL, NULL); }
             | expr ';'                        { $$ = $1; }
             | PRINT expr ';'                  { $$ = opr("print", PRINT, 1, $2); }
-            | VARIABLE '=' expr ';'           { $$ = opr("assign", '=', 2, id($1, INT), $3); }
+            | INT_TYPE VARIABLE ';'           { $$ = id($2, INT); }
+            | FLOAT_TYPE VARIABLE ';'         { $$ = id($2, FLOAT); }
+            | CHAR_TYPE VARIABLE ';'          { $$ = id($2, CHARAC); }
+            | VARIABLE '=' expr ';'           { $$ = opr("assign", '=', 2, id($1, PK), $3); }
             | DO stmt WHILE '(' expr ')' ';'  { $$ = opr("do", DO, 2, $2, $5); }
             | WHILE '(' expr ')' stmt         { $$ = opr("while", WHILE, 2, $3, $5); }
             | IF '(' expr ')' stmt %prec IFX  { $$ = opr("if", IF, 2, $3, $5); }
