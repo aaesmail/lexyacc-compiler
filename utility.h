@@ -29,5 +29,39 @@ typedef struct nodeTypeTag {
   };
 } nodeType;
 
-extern int sym[26];
+typedef struct {
+  int value;
+  varType type;
+} conSymTable;
+
+typedef struct {
+  char *name;
+  varType type;
+
+  union {
+    int intVal;
+    char charVal;
+    float floatVal;
+  };
+} idSymTable;
+
+typedef struct {
+  char *name;
+} oprSymTable;
+
+typedef struct {
+  nodeEnum type;
+  int lineNo;
+
+  union {
+    conSymTable con;
+    idSymTable id;
+    oprSymTable opr;
+  };
+} symTableEntry;
+
 FILE *fptr;
+extern int yylineno;
+extern int symTableSize;
+extern int symTableIndex;
+extern symTableEntry *sym;

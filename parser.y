@@ -2,17 +2,28 @@
     #include <stdio.h>
     #include <stdlib.h>
     #include <stdarg.h>
+    #include <string.h>
     #include "utility.h"
 
-    nodeType *opr(int oper, int nops, ...);
-    nodeType *id(int i, varType type);
-    nodeType *con(int value);
+    nodeType *opr(char *name, int oper, int nops, ...);
+    nodeType *id(char *name, int i, varType type);
+    nodeType *con(int value, varType type);
 
+    void initSymTable();
+    void extendSymTable();
+    void destroySymTable();
+    void addConToSymTable();
+    void addIdToSymTable();
+    void addOprToSymTable();
+    void printSymTable();
+    int searchForId();
     void freeNode(nodeType *p);
     int ex(nodeType *p);
     int yylex(void);
     void yyerror(char *s);
-    int sym[26];
+    int symTableSize;
+    int symTableIndex;
+    symTableEntry *sym;
 %}
 
 %union {
@@ -37,7 +48,7 @@
 %%
 
 program:
-              function                          { exit(0); }
+              function
             ;
 
 function:
@@ -46,47 +57,47 @@ function:
             ;
 
 stmt:
-              ';'                             { $$ = opr(';', 2, NULL, NULL); }
+              ';'                             { $$ = opr("NA", ';', 2, NULL, NULL); }
             | expr ';'                        { $$ = $1; }
-            | PRINT expr ';'                  { $$ = opr(PRINT, 1, $2); }
-            | VARIABLE '=' expr ';'           { $$ = opr('=', 2, id($1, INT), $3); }
-            | DO stmt WHILE '(' expr ')' ';'  { $$ = opr(DO, 2, $2, $5); }
-            | WHILE '(' expr ')' stmt         { $$ = opr(WHILE, 2, $3, $5); }
-            | IF '(' expr ')' stmt %prec IFX  { $$ = opr(IF, 2, $3, $5); }
-            | IF '(' expr ')' stmt ELSE stmt  { $$ = opr(IF, 3, $3, $5, $7); }
-            | SWITCH '(' VARIABLE ')' '{' switch_body '}' { $$ = opr(SWITCH, 2, id($3, PK), $6); }
+            | PRINT expr ';'                  { $$ = opr("print", PRINT, 1, $2); }
+            | VARIABLE '=' expr ';'           { $$ = opr("assign", '=', 2, id("var", $1, INT), $3); }
+            | DO stmt WHILE '(' expr ')' ';'  { $$ = opr("do", DO, 2, $2, $5); }
+            | WHILE '(' expr ')' stmt         { $$ = opr("while", WHILE, 2, $3, $5); }
+            | IF '(' expr ')' stmt %prec IFX  { $$ = opr("if", IF, 2, $3, $5); }
+            | IF '(' expr ')' stmt ELSE stmt  { $$ = opr("if else", IF, 3, $3, $5, $7); }
+            | SWITCH '(' VARIABLE ')' '{' switch_body '}' { $$ = opr("switch", SWITCH, 2, id("var", $3, PK), $6); }
             | '{' stmt_list '}'               { $$ = $2; }
             ;
 
 stmt_list:
               stmt                            { $$ = $1; }
-            | stmt_list stmt                  { $$ = opr(';', 2, $1, $2); }
+            | stmt_list stmt                  { $$ = opr("NA", ';', 2, $1, $2); }
             ;
 
 switch_body:
               case_stmt                       { $$ = $1; }
-            | switch_body case_stmt           { $$ = opr(';', 2, $1, $2); }
+            | switch_body case_stmt           { $$ = opr("NA", ';', 2, $1, $2); }
             ;
 
 case_stmt:
-              CASE expr ':' stmt BREAK ';'    { $$ = opr(CASE, 2, $2, $4); }
-            | DEFAULT ':' stmt BREAK ';'      { $$ = opr(DEFAULT, 1, $3); }
+              CASE expr ':' stmt BREAK ';'    { $$ = opr("case", CASE, 2, $2, $4); }
+            | DEFAULT ':' stmt BREAK ';'      { $$ = opr("default", DEFAULT, 1, $3); }
             ;
 
 expr:
-              INTEGER                         { $$ = con($1); }
-            | VARIABLE                        { $$ = id($1, PK); }
-            | '-' expr %prec UMINUS           { $$ = opr(UMINUS, 1, $2); }
-            | expr '+' expr                   { $$ = opr('+', 2, $1, $3); }
-            | expr '-' expr                   { $$ = opr('-', 2, $1, $3); }
-            | expr '*' expr                   { $$ = opr('*', 2, $1, $3); }
-            | expr '/' expr                   { $$ = opr('/', 2, $1, $3); }
-            | expr '<' expr                   { $$ = opr('<', 2, $1, $3); }
-            | expr '>' expr                   { $$ = opr('>', 2, $1, $3); }
-            | expr GE expr                    { $$ = opr(GE, 2, $1, $3); }
-            | expr LE expr                    { $$ = opr(LE, 2, $1, $3); }
-            | expr NE expr                    { $$ = opr(NE, 2, $1, $3); }
-            | expr EQ expr                    { $$ = opr(EQ, 2, $1, $3); }
+              INTEGER                         { $$ = con($1, INT); }
+            | VARIABLE                        { $$ = id("var", $1, PK); }
+            | '-' expr %prec UMINUS           { $$ = opr("negative", UMINUS, 1, $2); }
+            | expr '+' expr                   { $$ = opr("add", '+', 2, $1, $3); }
+            | expr '-' expr                   { $$ = opr("sub", '-', 2, $1, $3); }
+            | expr '*' expr                   { $$ = opr("mul", '*', 2, $1, $3); }
+            | expr '/' expr                   { $$ = opr("div", '/', 2, $1, $3); }
+            | expr '<' expr                   { $$ = opr("<", '<', 2, $1, $3); }
+            | expr '>' expr                   { $$ = opr(">", '>', 2, $1, $3); }
+            | expr GE expr                    { $$ = opr(">=", GE, 2, $1, $3); }
+            | expr LE expr                    { $$ = opr("<=", LE, 2, $1, $3); }
+            | expr NE expr                    { $$ = opr("!=", NE, 2, $1, $3); }
+            | expr EQ expr                    { $$ = opr("==", EQ, 2, $1, $3); }
             | '(' expr ')'                    { $$ = $2; }
             ;
 
@@ -94,7 +105,7 @@ expr:
 
 #define SIZEOF_NODETYPE ((char *)&p->con - (char *)p)
 
-nodeType *con(int value) {
+nodeType *con(int value, varType type) {
   nodeType *p;
   size_t nodeSize;
 
@@ -106,12 +117,15 @@ nodeType *con(int value) {
   p->type = typeCon;
   p->con.value = value;
 
+  addConToSymTable(value, type, yylineno);
+
   return p;
 }
 
-nodeType *id(int i, varType type) {
+nodeType *id(char *name, int i, varType type) {
   nodeType *p;
   size_t nodeSize;
+  int locInSym;
 
   nodeSize = SIZEOF_NODETYPE + sizeof(idNodeType);
 
@@ -120,15 +134,26 @@ nodeType *id(int i, varType type) {
 
   p->type = typeId;
   p->id.i = i;
+  p->id.type = type;
 
-  if (type != PK) {
-    p->id.type = type;
+  locInSym = searchForId(name);
+
+  if (type == PK && locInSym == -1) {
+    // handle variable used not defined error
+  }
+
+  if (locInSym == -1 && type != PK) {
+    addIdToSymTable(name, type, yylineno);
+  }
+
+  if (locInSym != -1) {
+    p->id.type = sym[i].id.type;
   }
 
   return p;
 }
 
-nodeType *opr(int oper, int nops, ...) {
+nodeType *opr(char *name, int oper, int nops, ...) {
   va_list ap;
   nodeType *p;
   size_t nodeSize;
@@ -147,6 +172,10 @@ nodeType *opr(int oper, int nops, ...) {
   for (i = 0; i < nops; i++)
     p->opr.op[i] = va_arg(ap, nodeType*);
   va_end(ap);
+
+  if (strcmp(name, "NA") != 0) { 
+    addOprToSymTable(name, yylineno);
+  }
 
   return p;
 }
@@ -176,9 +205,14 @@ int main(void) {
     exit(1);
   }
 
+  initSymTable();
+
   yyparse();
 
   fclose(fptr);
+
+  printSymTable();
+  destroySymTable();
 
   return 0;
 }

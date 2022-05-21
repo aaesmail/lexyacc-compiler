@@ -1,4 +1,6 @@
 #include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
 #include "utility.h"
 #include "y.tab.h"
 
@@ -141,4 +143,143 @@ int ex(nodeType *p) {
   }
 
   return 0;
+}
+
+void initSymTable() {
+  symTableSize = 1;
+  symTableIndex = 0;
+  sym = malloc(symTableSize * sizeof(symTableEntry));
+}
+
+void extendSymTable() {
+  symTableSize *= 2;
+  sym = realloc(sym, symTableSize * sizeof(symTableEntry));
+}
+
+void destroySymTable() {
+  free(sym);
+}
+
+void addConToSymTable(int val, varType type, int lineNo) {
+  if (symTableSize == symTableIndex) {
+    extendSymTable();
+  }
+
+  sym[symTableIndex].con.value = val;
+  sym[symTableIndex].con.type = type;
+  sym[symTableIndex].lineNo = lineNo;
+  sym[symTableIndex].type = typeCon;
+  symTableIndex++;
+}
+
+void addIdToSymTable(char *name, varType type, int lineNo) {
+  if (symTableSize == symTableIndex) {
+    extendSymTable();
+  }
+
+  sym[symTableIndex].id.name = strdup(name);
+  sym[symTableIndex].id.type = type;
+  sym[symTableIndex].lineNo = lineNo;
+  sym[symTableIndex].type = typeId;
+  symTableIndex++;
+}
+
+void addOprToSymTable(char *name, int lineNo) {
+  if (symTableSize == symTableIndex) {
+    extendSymTable();
+  }
+
+  sym[symTableIndex].opr.name = strdup(name);
+  sym[symTableIndex].lineNo = lineNo;
+  sym[symTableIndex].type = typeOpr;
+  symTableIndex++;
+}
+
+int searchForId(char *name) {
+  int i;
+
+  for (i = 0; i < symTableIndex; i++) {
+    if (sym[i].type == typeId) {
+      if (strcmp(name, sym[i].id.name) == 0) {
+        return i;
+      }
+    }
+  }
+
+  return -1;
+}
+
+void printVarType(varType type) {
+  if (type == PK) {
+    printf("%s", "PK");
+  } else if (type == INT) {
+    printf("%s", "int");
+  } else {
+    printf("ERROR");
+  }
+}
+
+void printSymTable() {
+  int i;
+
+  printf("\n\t\t\t\t\t\tSymbol Table\n");
+  printf("\t\t\tLineNo\t\tType\t\tName\t\tVarType\t\tValue\n");
+
+  for (i = 0; i < symTableIndex; i++) {
+    printf("\t\t\t");
+
+    printf("%d", sym[i].lineNo);
+
+    printf("\t\t");
+
+    if (sym[i].type == typeCon) {
+      printf("%s", "const");
+    } else if (sym[i].type == typeId) {
+      printf("%s", "id");
+    } else if (sym[i].type == typeOpr) {
+      printf("%s", "opr");
+    } else {
+      printf("ERROR");
+    }
+
+    printf("\t\t");
+
+    if (sym[i].type == typeCon) {
+      printf("%s", "NA");
+    } else if (sym[i].type == typeId) {
+      printf("%s", sym[i].id.name);
+    } else if (sym[i].type == typeOpr) {
+      printf("%s", sym[i].opr.name);
+    } else {
+      printf("ERROR");
+    }
+
+    printf("\t\t");
+
+    if (sym[i].type == typeCon) {
+      printVarType(sym[i].con.type);
+    } else if (sym[i].type == typeId) {
+      printVarType(sym[i].id.type);
+    } else if (sym[i].type == typeOpr) {
+      printf("%s", "NA");
+    } else {
+      printf("ERROR");
+    }
+
+    printf("\t\t");
+
+    if (sym[i].type == typeCon) {
+      printf("%d", sym[i].con.value);
+    } else if (sym[i].type == typeId) {
+      printf("%d", sym[i].id.intVal);
+    } else if (sym[i].type == typeOpr) {
+      printf("%s", "NA");
+    } else {
+      printf("ERROR");
+    }
+
+    printf("\n");
+  }
+
+  printf("\n");
 }
