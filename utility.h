@@ -1,4 +1,5 @@
 typedef enum { typeCon, typeId, typeOpr } nodeEnum;
+typedef enum { PK, INT } varType;
 
 // constant
 typedef struct {
@@ -8,6 +9,7 @@ typedef struct {
 // id
 typedef struct {
   int i;
+  varType type;
 } idNodeType;
 
 // operator

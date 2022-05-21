@@ -5,7 +5,7 @@
     #include "utility.h"
 
     nodeType *opr(int oper, int nops, ...);
-    nodeType *id(int i);
+    nodeType *id(int i, varType type);
     nodeType *con(int value);
 
     void freeNode(nodeType *p);
@@ -49,12 +49,12 @@ stmt:
               ';'                             { $$ = opr(';', 2, NULL, NULL); }
             | expr ';'                        { $$ = $1; }
             | PRINT expr ';'                  { $$ = opr(PRINT, 1, $2); }
-            | VARIABLE '=' expr ';'           { $$ = opr('=', 2, id($1), $3); }
+            | VARIABLE '=' expr ';'           { $$ = opr('=', 2, id($1, INT), $3); }
             | DO stmt WHILE '(' expr ')' ';'  { $$ = opr(DO, 2, $2, $5); }
             | WHILE '(' expr ')' stmt         { $$ = opr(WHILE, 2, $3, $5); }
             | IF '(' expr ')' stmt %prec IFX  { $$ = opr(IF, 2, $3, $5); }
             | IF '(' expr ')' stmt ELSE stmt  { $$ = opr(IF, 3, $3, $5, $7); }
-            | SWITCH '(' VARIABLE ')' '{' switch_body '}' { $$ = opr(SWITCH, 2, id($3), $6); }
+            | SWITCH '(' VARIABLE ')' '{' switch_body '}' { $$ = opr(SWITCH, 2, id($3, PK), $6); }
             | '{' stmt_list '}'               { $$ = $2; }
             ;
 
@@ -75,7 +75,7 @@ case_stmt:
 
 expr:
               INTEGER                         { $$ = con($1); }
-            | VARIABLE                        { $$ = id($1); }
+            | VARIABLE                        { $$ = id($1, PK); }
             | '-' expr %prec UMINUS           { $$ = opr(UMINUS, 1, $2); }
             | expr '+' expr                   { $$ = opr('+', 2, $1, $3); }
             | expr '-' expr                   { $$ = opr('-', 2, $1, $3); }
@@ -109,7 +109,7 @@ nodeType *con(int value) {
   return p;
 }
 
-nodeType *id(int i) {
+nodeType *id(int i, varType type) {
   nodeType *p;
   size_t nodeSize;
 
@@ -120,6 +120,10 @@ nodeType *id(int i) {
 
   p->type = typeId;
   p->id.i = i;
+
+  if (type != PK) {
+    p->id.type = type;
+  }
 
   return p;
 }
