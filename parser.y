@@ -5,7 +5,7 @@
     #include <string.h>
     #include "utility.h"
 
-    nodeType *opr(char *name, int oper, int nops, ...);
+    nodeType *opr(int oper, int nops, ...);
     nodeType *id(char *name, varType type, int intVal, double floatVal, char charVal);
     nodeType *con(int intVal, char charVal, double floatVal, varType type);
 
@@ -61,37 +61,37 @@ function:
             ;
 
 stmt:
-              ';'                             { $$ = opr("NA", ';', 2, NULL, NULL); }
+              ';'                             { $$ = opr(';', 2, NULL, NULL); }
             | expr ';'                        { $$ = $1; }
-            | PRINT expr ';'                  { $$ = opr("print", PRINT, 1, $2); }
+            | PRINT { addOprToSymTable("print", yylineno); } expr ';'                  { $$ = opr(PRINT, 1, $3); }
             | CONST_INT_TYPE VARIABLE '=' INTEGER ';'     { $$ = id($2, CONST_INT, $4, 0.5, '0'); }
             | INT_TYPE VARIABLE ';'           { $$ = id($2, INT, 0, 0.5, '0'); }
             | CONST_FLOAT_TYPE VARIABLE '=' FLOAT_NUM ';'   { $$ = id($2, CONST_FLOAT, 0, $4, '0'); }
             | FLOAT_TYPE VARIABLE ';'         { $$ = id($2, FLOAT, 0, 0.5, '0'); }
             | CONST_CHAR_TYPE VARIABLE '=' CHARACTER ';'    { $$ = id($2, CONST_CHAR, 0, 0.5, $4); }
             | CHAR_TYPE VARIABLE ';'          { $$ = id($2, CHARAC, 0, 0.5, '0'); }
-            | VARIABLE '=' expr ';'           { $$ = opr("assign", '=', 2, id($1, PK, 0, 0.5, '0'), $3); }
-            | DO stmt WHILE '(' expr ')' ';'  { $$ = opr("do", DO, 2, $2, $5); }
-            | WHILE '(' expr ')' stmt         { $$ = opr("while", WHILE, 2, $3, $5); }
-            | IF '(' expr ')' stmt %prec IFX  { $$ = opr("if", IF, 2, $3, $5); }
-            | IF '(' expr ')' stmt ELSE stmt  { $$ = opr("if else", IF, 3, $3, $5, $7); }
-            | SWITCH '(' VARIABLE ')' '{' switch_body '}' { $$ = opr("switch", SWITCH, 2, id($3, PK, 0, 0.5, '0'), $6); }
+            | VARIABLE '=' { addOprToSymTable("assign", yylineno); } expr ';'           { $$ = opr('=', 2, id($1, PK, 0, 0.5, '0'), $4); }
+            | DO { addOprToSymTable("do while", yylineno); } stmt WHILE '(' expr ')' ';'  { $$ = opr(DO, 2, $3, $6); }
+            | WHILE { addOprToSymTable("while", yylineno); } '(' expr ')' stmt         { $$ = opr(WHILE, 2, $4, $6); }
+            | IF '(' expr ')' stmt %prec IFX  { $$ = opr(IF, 2, $3, $5); addOprToSymTable("if", yylineno); }
+            | IF '(' expr ')' stmt ELSE stmt  { $$ = opr(IF, 3, $3, $5, $7); addOprToSymTable("if else", yylineno); }
+            | SWITCH { addOprToSymTable("switch", yylineno); } '(' VARIABLE ')' '{' switch_body '}' { $$ = opr(SWITCH, 2, id($4, PK, 0, 0.5, '0'), $7); }
             | '{' stmt_list '}'               { $$ = $2; }
             ;
 
 stmt_list:
               stmt                            { $$ = $1; }
-            | stmt_list stmt                  { $$ = opr("NA", ';', 2, $1, $2); }
+            | stmt_list stmt                  { $$ = opr(';', 2, $1, $2); }
             ;
 
 switch_body:
               case_stmt                       { $$ = $1; }
-            | switch_body case_stmt           { $$ = opr("NA", ';', 2, $1, $2); }
+            | switch_body case_stmt           { $$ = opr(';', 2, $1, $2); }
             ;
 
 case_stmt:
-              CASE expr ':' stmt BREAK ';'    { $$ = opr("case", CASE, 2, $2, $4); }
-            | DEFAULT ':' stmt BREAK ';'      { $$ = opr("default", DEFAULT, 1, $3); }
+              CASE { addOprToSymTable("case", yylineno); } expr ':' stmt BREAK { addOprToSymTable("break", yylineno); } ';'    { $$ = opr(CASE, 2, $3, $5); }
+            | DEFAULT { addOprToSymTable("default", yylineno); } ':' stmt BREAK { addOprToSymTable("break", yylineno); } ';'      { $$ = opr(DEFAULT, 1, $4); }
             ;
 
 expr:
@@ -99,17 +99,17 @@ expr:
             | CHARACTER                       { $$ = con(0, $1, 0.5, CHARAC); }
             | FLOAT_NUM                       { $$ = con(0, '0', $1, FLOAT); }
             | VARIABLE                        { $$ = id($1, PK, 0, 0.5, '0'); }
-            | '-' expr %prec UMINUS           { $$ = opr("negative", UMINUS, 1, $2); }
-            | expr '+' expr                   { $$ = opr("add", '+', 2, $1, $3); }
-            | expr '-' expr                   { $$ = opr("sub", '-', 2, $1, $3); }
-            | expr '*' expr                   { $$ = opr("mul", '*', 2, $1, $3); }
-            | expr '/' expr                   { $$ = opr("div", '/', 2, $1, $3); }
-            | expr '<' expr                   { $$ = opr("<", '<', 2, $1, $3); }
-            | expr '>' expr                   { $$ = opr(">", '>', 2, $1, $3); }
-            | expr GE expr                    { $$ = opr(">=", GE, 2, $1, $3); }
-            | expr LE expr                    { $$ = opr("<=", LE, 2, $1, $3); }
-            | expr NE expr                    { $$ = opr("!=", NE, 2, $1, $3); }
-            | expr EQ expr                    { $$ = opr("==", EQ, 2, $1, $3); }
+            | '-' { addOprToSymTable("negative", yylineno); } expr %prec UMINUS           { $$ = opr(UMINUS, 1, $3); }
+            | expr '+' { addOprToSymTable("add", yylineno); } expr                   { $$ = opr('+', 2, $1, $4); }
+            | expr '-' { addOprToSymTable("sub", yylineno); } expr                   { $$ = opr('-', 2, $1, $4); }
+            | expr '*' { addOprToSymTable("mul", yylineno); } expr                   { $$ = opr('*', 2, $1, $4); }
+            | expr '/' { addOprToSymTable("div", yylineno); } expr                   { $$ = opr('/', 2, $1, $4); }
+            | expr '<' { addOprToSymTable("<", yylineno); } expr                   { $$ = opr('<', 2, $1, $4); }
+            | expr '>' { addOprToSymTable(">", yylineno); } expr                   { $$ = opr('>', 2, $1, $4); }
+            | expr GE { addOprToSymTable(">=", yylineno); } expr                    { $$ = opr(GE, 2, $1, $4); }
+            | expr LE { addOprToSymTable("<=", yylineno); } expr                    { $$ = opr(LE, 2, $1, $4); }
+            | expr NE { addOprToSymTable("!=", yylineno); } expr                    { $$ = opr(NE, 2, $1, $4); }
+            | expr EQ { addOprToSymTable("==", yylineno); } expr                    { $$ = opr(EQ, 2, $1, $4); }
             | '(' expr ')'                    { $$ = $2; }
             ;
 
@@ -203,7 +203,7 @@ nodeType *id(char *name, varType type, int intVal, double floatVal, char charVal
   return p;
 }
 
-nodeType *opr(char *name, int oper, int nops, ...) {
+nodeType *opr(int oper, int nops, ...) {
   va_list ap;
   nodeType *p;
   size_t nodeSize;
@@ -222,10 +222,6 @@ nodeType *opr(char *name, int oper, int nops, ...) {
   for (i = 0; i < nops; i++)
     p->opr.op[i] = va_arg(ap, nodeType*);
   va_end(ap);
-
-  if (strcmp(name, "NA") != 0) { 
-    addOprToSymTable(name, yylineno);
-  }
 
   return p;
 }
