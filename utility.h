@@ -1,9 +1,14 @@
 typedef enum { typeCon, typeId, typeOpr } nodeEnum;
-typedef enum { PK, INT } varType;
+typedef enum { PK, INT, CHARAC } varType;
 
 // constant
 typedef struct {
-  int value;
+  varType type;
+
+  union {
+    int intVal;
+    char charVal;
+  };
 } conNodeType;
 
 // id
@@ -30,8 +35,12 @@ typedef struct nodeTypeTag {
 } nodeType;
 
 typedef struct {
-  int value;
   varType type;
+
+  union {
+    int intVal;
+    char charVal;
+  };
 } conSymTable;
 
 typedef struct {

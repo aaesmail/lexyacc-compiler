@@ -1,4 +1,4 @@
 - variable types
-- variable more than 1 char names
+- constant vars
 - error handler
 - semantic errors

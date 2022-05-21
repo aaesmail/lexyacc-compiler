@@ -9,6 +9,8 @@ static int lbl;
 static char *switchVar;
 static int switchLbl;
 
+void printConstant(conNodeType con);
+
 int ex(nodeType *p) {
   int lbl1, lbl2;
 
@@ -16,7 +18,9 @@ int ex(nodeType *p) {
 
   switch(p->type) {
     case typeCon:
-      fprintf(fptr, "\tpush\t%d\n", p->con.value);
+      fprintf(fptr, "\tpush\t");
+      printConstant(p->con);
+      fprintf(fptr, "\n");
       break;
 
     case typeId:
@@ -145,6 +149,22 @@ int ex(nodeType *p) {
   return 0;
 }
 
+void printConstant(conNodeType con) {
+  switch (con.type) {
+    case INT:
+      fprintf(fptr, "%d", con.intVal);
+      break;
+
+    case CHARAC:
+      fprintf(fptr, "%c", con.charVal);
+      break;
+
+    default:
+      fprintf(fptr, "ERROR");
+      break;
+  }
+}
+
 void initSymTable() {
   symTableSize = 1;
   symTableIndex = 0;
@@ -160,12 +180,17 @@ void destroySymTable() {
   free(sym);
 }
 
-void addConToSymTable(int val, varType type, int lineNo) {
+void addConToSymTable(int intVal, char charVal, varType type, int lineNo) {
   if (symTableSize == symTableIndex) {
     extendSymTable();
   }
 
-  sym[symTableIndex].con.value = val;
+  if (type == INT) {
+    sym[symTableIndex].con.intVal = intVal;
+  } else if (type == CHARAC) {
+    sym[symTableIndex].con.charVal = charVal;
+  }
+
   sym[symTableIndex].con.type = type;
   sym[symTableIndex].lineNo = lineNo;
   sym[symTableIndex].type = typeCon;
@@ -214,6 +239,18 @@ void printVarType(varType type) {
     printf("%s", "PK");
   } else if (type == INT) {
     printf("%s", "int");
+  } else if (type == CHARAC) {
+    printf("%s", "char");
+  } else {
+    printf("ERROR");
+  }
+}
+
+void printConstSym(conSymTable con) {
+  if (con.type == INT) {
+    printf("%d", con.intVal);
+  } else if (con.type == CHARAC) {
+    printf("%c", con.charVal);
   } else {
     printf("ERROR");
   }
@@ -269,7 +306,7 @@ void printSymTable() {
     printf("\t\t");
 
     if (sym[i].type == typeCon) {
-      printf("%d", sym[i].con.value);
+      printConstSym(sym[i].con);
     } else if (sym[i].type == typeId) {
       printf("%s", "NA");
     } else if (sym[i].type == typeOpr) {

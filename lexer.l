@@ -35,7 +35,12 @@
                                   return INTEGER;
                                 }
 
-[-()<>=+*/:;{}.]                 {
+['].[']                         {
+                                  yylval.cValue = yytext[1];
+                                  return CHAR;
+                                } 
+
+[-()<>=+*/:;{}.]                {
                                   return *yytext;
                                 }
 

@@ -7,16 +7,16 @@
 
     nodeType *opr(char *name, int oper, int nops, ...);
     nodeType *id(char *name, varType type);
-    nodeType *con(int value, varType type);
+    nodeType *con(int intVal, char charVal, varType type);
 
     void initSymTable();
     void extendSymTable();
     void destroySymTable();
-    void addConToSymTable();
-    void addIdToSymTable();
-    void addOprToSymTable();
+    void addConToSymTable(int intVal, char charVal, varType type, int lineNo);
+    void addIdToSymTable(char *name, varType type, int lineNo);
+    void addOprToSymTable(char *name, int lineNo);
     void printSymTable();
-    int searchForId();
+    int searchForId(char *name);
     void freeNode(nodeType *p);
     int ex(nodeType *p);
     int yylex(void);
@@ -28,11 +28,13 @@
 
 %union {
   int iValue;
+  char cValue;
   char *sIndex;
   nodeType *nPtr;
 };
 
 %token <iValue> INTEGER
+%token <cValue> CHAR
 %token <sIndex> VARIABLE
 %token DO WHILE IF SWITCH CASE DEFAULT BREAK PRINT
 %nonassoc IFX
@@ -85,7 +87,8 @@ case_stmt:
             ;
 
 expr:
-              INTEGER                         { $$ = con($1, INT); }
+              INTEGER                         { $$ = con($1, '0', INT); }
+            | CHAR                            { $$ = con(0, $1, CHARAC); }
             | VARIABLE                        { $$ = id($1, PK); }
             | '-' expr %prec UMINUS           { $$ = opr("negative", UMINUS, 1, $2); }
             | expr '+' expr                   { $$ = opr("add", '+', 2, $1, $3); }
@@ -105,7 +108,7 @@ expr:
 
 #define SIZEOF_NODETYPE ((char *)&p->con - (char *)p)
 
-nodeType *con(int value, varType type) {
+nodeType *con(int intVal, char charVal, varType type) {
   nodeType *p;
   size_t nodeSize;
 
@@ -115,9 +118,15 @@ nodeType *con(int value, varType type) {
     yyerror("Out of memory!");
 
   p->type = typeCon;
-  p->con.value = value;
+  p->con.type = type;
 
-  addConToSymTable(value, type, yylineno);
+  if (type == INT) {
+    p->con.intVal = intVal;
+  } else if (type == CHARAC) {
+    p->con.charVal = charVal;
+  }
+
+  addConToSymTable(intVal, charVal, type, yylineno);
 
   return p;
 }
