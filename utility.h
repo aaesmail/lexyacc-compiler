@@ -16,6 +16,7 @@ typedef struct {
 typedef struct {
   char *name;
   varType type;
+  int used;
 
   union {
     int intVal;
@@ -54,6 +55,7 @@ typedef struct {
 typedef struct {
   char *name;
   varType type;
+  int used;
 
   union {
     int intVal;

@@ -1,6 +1,6 @@
 int ybc;
 char k;
-const_int i = 5;
+const_int hjk = 5;
 const_float m = 1.5;
 const_char j = 'c';
 ybc = 5;

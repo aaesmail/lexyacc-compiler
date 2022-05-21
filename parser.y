@@ -166,6 +166,16 @@ nodeType *id(char *name, varType type, int intVal, double floatVal, char charVal
 
   locInSym = searchForId(name);
 
+  if (type == PK) {
+    p->id.used = 1;
+  } else {
+    p->id.used = 0;
+  }
+
+  if (locInSym != -1 && type == PK) {
+    sym[locInSym].id.used = 1;
+  }
+
   if (type == PK && locInSym == -1) {
     // handle variable used not defined error
   }

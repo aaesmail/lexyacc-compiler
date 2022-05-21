@@ -25,9 +25,11 @@ int ex(nodeType *p) {
       break;
 
     case typeId:
-      fprintf(fptr, "\tpush\t");
-      writeId(p->id);
-      fprintf(fptr, "\n");
+      if (p->id.used == 1) {
+        fprintf(fptr, "\tpush\t");
+        writeId(p->id);
+        fprintf(fptr, "\n");
+      }
       break;
 
     case typeOpr:
@@ -236,6 +238,7 @@ void addIdToSymTable(char *name, varType type, int lineNo, int intVal, double fl
 
   sym[symTableIndex].id.name = strdup(name);
   sym[symTableIndex].id.type = type;
+  sym[symTableIndex].id.used = 0;
   sym[symTableIndex].lineNo = lineNo;
   sym[symTableIndex].type = typeId;
 
