@@ -25,11 +25,11 @@
 "break"                         { return BREAK; }
 "print"                         { return PRINT; }
 
-"const int"                     { return CONST_INT_TYPE; }
+"const_int"                     { return CONST_INT_TYPE; }
 "int"                           { return INT_TYPE; }
-"const float"                   { return CONST_FLOAT_TYPE; }
+"const_float"                   { return CONST_FLOAT_TYPE; }
 "float"                         { return FLOAT_TYPE; }
-"const char"                    { return CONST_CHAR_TYPE; }
+"const_char"                    { return CONST_CHAR_TYPE; }
 "char"                          { return CHAR_TYPE; }
 
 [a-zA-Z][0-9a-zA-Z]*            {

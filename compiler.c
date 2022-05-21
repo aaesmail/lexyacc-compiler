@@ -162,7 +162,7 @@ void printConstant(conNodeType con) {
       break;
 
     case CHARAC:
-      fprintf(fptr, "%c", con.charVal);
+      fprintf(fptr, "%d", con.charVal);
       break;
 
     case FLOAT:
@@ -186,7 +186,7 @@ void writeId(idNodeType id) {
       break;
 
     case CONST_CHAR:
-      fprintf(fptr, "%c", id.charVal);
+      fprintf(fptr, "%d", id.charVal);
       break;
 
     default:
@@ -285,11 +285,11 @@ void printVarType(varType type) {
   } else if (type == FLOAT) {
     printf("%s", "float\t");
   } else if (type == CONST_INT) {
-    printf("%s", "const int");
+    printf("%s", "const_int");
   } else if (type == CONST_FLOAT) {
-    printf("%s", "const float");
+    printf("%s", "const_float");
   } else if (type == CONST_CHAR) {
-    printf("%s", "const char");
+    printf("%s", "const_char");
   } else {
     printf("ERROR\t");
   }
