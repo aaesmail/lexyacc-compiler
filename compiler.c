@@ -29,6 +29,14 @@ int ex(nodeType *p) {
         fprintf(fptr, "\tpush\t");
         writeId(p->id);
         fprintf(fptr, "\n");
+      } else {
+        if (p->id.type == INT) {
+          fprintf(fptr, "\tvar\t%s\t4\n", p->id.name);
+        } else if (p->id.type == CHARAC) {
+          fprintf(fptr, "\tvar\t%s\t1\n", p->id.name);
+        } else if (p->id.type == FLOAT) {
+          fprintf(fptr, "\tvar\t%s\t8\n", p->id.name);
+        }
       }
       break;
 
