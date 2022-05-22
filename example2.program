@@ -1,5 +1,10 @@
 int ybc;
 char k;
+int x;
+int y;
+int i;
+int c;
+int mjd;
 const_int hjk = 5;
 const_float m = 1.5;
 const_char j = 'c';
@@ -11,6 +16,8 @@ k = 'g';
 c = 1.5;
 
 i = 0;
+
+j = 5;
 
 while (i < 5) {
   print i;

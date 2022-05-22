@@ -11,6 +11,7 @@ static int switchLbl;
 
 void printConstant(conNodeType con);
 void writeId(idNodeType id);
+void handleAssignmentToConstantError(idNodeType id);
 
 int ex(nodeType *p) {
   int lbl1, lbl2;
@@ -105,7 +106,7 @@ int ex(nodeType *p) {
 
         case '=':
           ex(p->opr.op[1]);
-          // handle assignment to constant error
+          handleAssignmentToConstantError(p->opr.op[0]->id);
           fprintf(fptr, "\tpop\t%s\n", p->opr.op[0]->id.name);
           break;
 
@@ -239,7 +240,7 @@ void addConToSymTable(int intVal, char charVal, double floatVal, varType type, i
   symTableIndex++;
 }
 
-void addIdToSymTable(char *name, varType type, int lineNo, int intVal, double floatVal, char charVal) {
+int addIdToSymTable(char *name, varType type, int lineNo, int intVal, double floatVal, char charVal) {
   if (symTableSize == symTableIndex) {
     extendSymTable();
   }
@@ -247,6 +248,7 @@ void addIdToSymTable(char *name, varType type, int lineNo, int intVal, double fl
   sym[symTableIndex].id.name = strdup(name);
   sym[symTableIndex].id.type = type;
   sym[symTableIndex].id.used = 0;
+  sym[symTableIndex].id.init = 0;
   sym[symTableIndex].lineNo = lineNo;
   sym[symTableIndex].type = typeId;
 
@@ -258,7 +260,7 @@ void addIdToSymTable(char *name, varType type, int lineNo, int intVal, double fl
     sym[symTableIndex].id.charVal = charVal;
   }
 
-  symTableIndex++;
+  return symTableIndex++;
 }
 
 void addOprToSymTable(char *name, int lineNo) {
@@ -393,4 +395,30 @@ void printSymTable() {
   }
 
   printf("\n");
+}
+
+void checkUnusedVariables() {
+  int i;
+
+  for (i = 0; i < symTableIndex; i++) {
+    if (sym[i].type == typeId) {
+      if (sym[i].id.used == 0) {
+        printf("\nWarning: Unused variable %s declared on line %d\n", sym[i].id.name, sym[i].lineNo);
+      }
+    }
+  }
+}
+
+void handleAssignmentToConstantError(idNodeType id) {
+  int i;
+
+  for (i = 0; i < symTableIndex; i++) {
+    if (sym[i].type == typeId) {
+      if (strcmp(id.name, sym[i].id.name) == 0) {
+        if (sym[i].id.type == CONST_INT || sym[i].id.type == CONST_FLOAT || sym[i].id.type == CONST_CHAR) {
+          printf("\nError on line %d: Assignment to constant variable %s declared on line %d\n", yylineno, sym[i].id.name, sym[i].lineNo);
+        }
+      }
+    }
+  }
 }

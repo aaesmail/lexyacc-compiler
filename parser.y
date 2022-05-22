@@ -6,16 +6,17 @@
     #include "utility.h"
 
     nodeType *opr(int oper, int nops, ...);
-    nodeType *id(char *name, varType type, int intVal, double floatVal, char charVal);
+    nodeType *id(char *name, varType type, int intVal, double floatVal, char charVal, int init);
     nodeType *con(int intVal, char charVal, double floatVal, varType type);
 
     void initSymTable();
     void extendSymTable();
     void destroySymTable();
     void addConToSymTable(int intVal, char charVal, double floatVal, varType type, int lineNo);
-    void addIdToSymTable(char *name, varType type, int lineNo, int intVal, double floatVal, char charVal);
+    int addIdToSymTable(char *name, varType type, int lineNo, int intVal, double floatVal, char charVal);
     void addOprToSymTable(char *name, int lineNo);
     void printSymTable();
+    void checkUnusedVariables();
     int searchForId(char *name);
     void freeNode(nodeType *p);
     int ex(nodeType *p);
@@ -64,18 +65,18 @@ stmt:
               ';'                             { $$ = opr(';', 2, NULL, NULL); }
             | expr ';'                        { $$ = $1; }
             | PRINT { addOprToSymTable("print", yylineno); } expr ';'                  { $$ = opr(PRINT, 1, $3); }
-            | CONST_INT_TYPE VARIABLE '=' INTEGER ';'     { $$ = id($2, CONST_INT, $4, 0.5, '0'); }
-            | INT_TYPE VARIABLE ';'           { $$ = id($2, INT, 0, 0.5, '0'); }
-            | CONST_FLOAT_TYPE VARIABLE '=' FLOAT_NUM ';'   { $$ = id($2, CONST_FLOAT, 0, $4, '0'); }
-            | FLOAT_TYPE VARIABLE ';'         { $$ = id($2, FLOAT, 0, 0.5, '0'); }
-            | CONST_CHAR_TYPE VARIABLE '=' CHARACTER ';'    { $$ = id($2, CONST_CHAR, 0, 0.5, $4); }
-            | CHAR_TYPE VARIABLE ';'          { $$ = id($2, CHARAC, 0, 0.5, '0'); }
-            | VARIABLE '=' { addOprToSymTable("assign", yylineno); } expr ';'           { $$ = opr('=', 2, id($1, PK, 0, 0.5, '0'), $4); }
+            | CONST_INT_TYPE VARIABLE '=' INTEGER ';'     { $$ = id($2, CONST_INT, $4, 0.5, '0', 1); }
+            | INT_TYPE VARIABLE ';'           { $$ = id($2, INT, 0, 0.5, '0', 0); }
+            | CONST_FLOAT_TYPE VARIABLE '=' FLOAT_NUM ';'   { $$ = id($2, CONST_FLOAT, 0, $4, '0', 1); }
+            | FLOAT_TYPE VARIABLE ';'         { $$ = id($2, FLOAT, 0, 0.5, '0', 0); }
+            | CONST_CHAR_TYPE VARIABLE '=' CHARACTER ';'    { $$ = id($2, CONST_CHAR, 0, 0.5, $4, 1); }
+            | CHAR_TYPE VARIABLE ';'          { $$ = id($2, CHARAC, 0, 0.5, '0', 0); }
+            | VARIABLE '=' { addOprToSymTable("assign", yylineno); } expr ';'           { $$ = opr('=', 2, id($1, PK, 0, 0.5, '0', 1), $4); }
             | DO { addOprToSymTable("do while", yylineno); } stmt WHILE '(' expr ')' ';'  { $$ = opr(DO, 2, $3, $6); }
             | WHILE { addOprToSymTable("while", yylineno); } '(' expr ')' stmt         { $$ = opr(WHILE, 2, $4, $6); }
             | IF '(' expr ')' stmt %prec IFX  { $$ = opr(IF, 2, $3, $5); addOprToSymTable("if", yylineno); }
             | IF '(' expr ')' stmt ELSE stmt  { $$ = opr(IF, 3, $3, $5, $7); addOprToSymTable("if else", yylineno); }
-            | SWITCH { addOprToSymTable("switch", yylineno); } '(' VARIABLE ')' '{' switch_body '}' { $$ = opr(SWITCH, 2, id($4, PK, 0, 0.5, '0'), $7); }
+            | SWITCH { addOprToSymTable("switch", yylineno); } '(' VARIABLE ')' '{' switch_body '}' { $$ = opr(SWITCH, 2, id($4, PK, 0, 0.5, '0', 0), $7); }
             | '{' stmt_list '}'               { $$ = $2; }
             ;
 
@@ -98,7 +99,7 @@ expr:
               INTEGER                         { $$ = con($1, '0', 0.5, INT); }
             | CHARACTER                       { $$ = con(0, $1, 0.5, CHARAC); }
             | FLOAT_NUM                       { $$ = con(0, '0', $1, FLOAT); }
-            | VARIABLE                        { $$ = id($1, PK, 0, 0.5, '0'); }
+            | VARIABLE                        { $$ = id($1, PK, 0, 0.5, '0', 0); }
             | '-' { addOprToSymTable("negative", yylineno); } expr %prec UMINUS           { $$ = opr(UMINUS, 1, $3); }
             | expr '+' { addOprToSymTable("add", yylineno); } expr                   { $$ = opr('+', 2, $1, $4); }
             | expr '-' { addOprToSymTable("sub", yylineno); } expr                   { $$ = opr('-', 2, $1, $4); }
@@ -142,7 +143,7 @@ nodeType *con(int intVal, char charVal, double floatVal, varType type) {
   return p;
 }
 
-nodeType *id(char *name, varType type, int intVal, double floatVal, char charVal) {
+nodeType *id(char *name, varType type, int intVal, double floatVal, char charVal, int init) {
   nodeType *p;
   size_t nodeSize;
   int locInSym;
@@ -170,6 +171,7 @@ nodeType *id(char *name, varType type, int intVal, double floatVal, char charVal
     p->id.used = 1;
   } else {
     p->id.used = 0;
+    p->id.init = 0;
   }
 
   if (locInSym != -1 && type == PK) {
@@ -177,27 +179,36 @@ nodeType *id(char *name, varType type, int intVal, double floatVal, char charVal
   }
 
   if (type == PK && locInSym == -1) {
-    // handle variable used not defined error
+    fprintf(stdout, "Line %d, variable %s not defined before\n", yylineno, name);
   }
 
   if (type != PK && locInSym != -1) {
     fprintf(stdout, "Line %d, Variable %s already declared before on line %d\n", yylineno, sym[locInSym].id.name, sym[locInSym].lineNo);
   }
 
-  if (locInSym == -1 && type != PK) {
-    addIdToSymTable(name, type, yylineno, intVal, floatVal, charVal);
+  if (locInSym != -1 && type == PK) {
+    if (sym[locInSym].id.init == 0 && init != 1) {
+      fprintf(stdout, "Line %d, Variable %s declared on line %d used before being initialized\n", yylineno, sym[locInSym].id.name, sym[locInSym].lineNo);
+    }
   }
 
-  if (locInSym != -1) {
-    p->id.type = sym[locInSym].id.type;
+  if (locInSym == -1 && type != PK) {
+    locInSym = addIdToSymTable(name, type, yylineno, intVal, floatVal, charVal);
+  }
 
-    if (p->id.type == CONST_INT) {
-      p->id.intVal = sym[locInSym].id.intVal;
-    } else if (p->id.type == CONST_FLOAT) {
-      p->id.floatVal = sym[locInSym].id.floatVal;
-    } else if (p->id.type == CONST_CHAR) {
-      p->id.charVal = sym[locInSym].id.charVal;
-    }
+  if (init == 1) {
+    sym[locInSym].id.init = 1;
+  }
+
+  p->id.type = sym[locInSym].id.type;
+  p->id.init = sym[locInSym].id.init;
+
+  if (p->id.type == CONST_INT) {
+    p->id.intVal = sym[locInSym].id.intVal;
+  } else if (p->id.type == CONST_FLOAT) {
+    p->id.floatVal = sym[locInSym].id.floatVal;
+  } else if (p->id.type == CONST_CHAR) {
+    p->id.charVal = sym[locInSym].id.charVal;
   }
 
   return p;
@@ -260,6 +271,8 @@ int main(void) {
   yyparse();
 
   fclose(fptr);
+
+  checkUnusedVariables();
 
   printSymTable();
   destroySymTable();

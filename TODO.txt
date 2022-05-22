@@ -1,2 +1,8 @@
-- semantic errors
+- Improper usage of variables regarding their type
 - functions
+- node server
+- Documentation
+
+BONUS so far:
+- Detect variables used before declaration
+- Detect assignment to constant error
