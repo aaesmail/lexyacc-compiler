@@ -1,4 +1,3 @@
-- Improper usage of variables regarding their type
 - functions
 - node server
 - Documentation

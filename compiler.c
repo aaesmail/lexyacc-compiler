@@ -12,6 +12,8 @@ static int switchLbl;
 void printConstant(conNodeType con);
 void writeId(idNodeType id);
 void handleAssignmentToConstantError(idNodeType id);
+void handleTypesError(struct nodeTypeTag * left, struct nodeTypeTag * right);
+void handleNegativeError(struct nodeTypeTag * node);
 
 int ex(nodeType *p) {
   int lbl1, lbl2;
@@ -107,15 +109,18 @@ int ex(nodeType *p) {
         case '=':
           ex(p->opr.op[1]);
           handleAssignmentToConstantError(p->opr.op[0]->id);
+          handleTypesError(p->opr.op[0], p->opr.op[1]);
           fprintf(fptr, "\tpop\t%s\n", p->opr.op[0]->id.name);
           break;
 
         case UMINUS:
+          handleNegativeError(p->opr.op[0]);
           ex(p->opr.op[0]);
           fprintf(fptr, "\tneg\n");
           break;
 
         default:
+          handleTypesError(p->opr.op[0], p->opr.op[1]);
           ex(p->opr.op[0]);
           ex(p->opr.op[1]);
 
@@ -420,5 +425,77 @@ void handleAssignmentToConstantError(idNodeType id) {
         }
       }
     }
+  }
+}
+
+varType getType(struct nodeTypeTag * node) {
+  varType type;
+  if (node->type == typeId) {
+    type = node->id.type;
+  } else if (node->type == typeCon) {
+    type = node->con.type;
+  } else {
+    printf("[getType] ERROR type unknown\n");
+  }
+
+  if (type == CONST_CHAR) {
+    type = CHARAC;
+  } else if (type == CONST_FLOAT) {
+    type = FLOAT;
+  } else if (type == CONST_INT) {
+    type = INT;
+  } else if (type == PK) {
+    printf("[getType] ERROR got variable of type PK\n");
+  }
+
+  return type;
+}
+
+void handleTypesError(struct nodeTypeTag * left, struct nodeTypeTag * right) {
+  if (left->type == typeOpr || right->type == typeOpr) {
+    return;
+  }
+
+  varType leftType = getType(left);
+  varType rightType = getType(right);
+
+  if (leftType != rightType) {
+    printf("\nError on line %d: Type mismatch between ", yylineno);
+
+    if (leftType == INT) {
+      printf("int");
+    } else if (leftType == CHARAC) {
+      printf("char");
+    } else if (leftType == FLOAT) {
+      printf("float");
+    } else {
+      printf("[handleTypesError] UNKNOWN LEFT TYPE ERROR\n");
+    }
+
+    printf(" and ");
+
+    if (rightType == INT) {
+      printf("int");
+    } else if (rightType == CHARAC) {
+      printf("char");
+    } else if (rightType == FLOAT) {
+      printf("float");
+    } else {
+      printf("[handleTypesError] UNKNOWN RIGHT TYPE ERROR\n");
+    }
+
+    printf("\n");
+  }
+}
+
+void handleNegativeError(struct nodeTypeTag * node) {
+  if (node->type == typeOpr) {
+    return;
+  }
+
+  varType type = getType(node);
+
+  if (type == CHARAC) {
+    printf("\nError on line %d: Cannot apply unary minus to char type\n", yylineno);
   }
 }
