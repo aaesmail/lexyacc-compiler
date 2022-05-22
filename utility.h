@@ -81,6 +81,7 @@ typedef struct {
 
 FILE *fptr;
 extern int yylineno;
+extern char *yytext;
 extern int symTableSize;
 extern int symTableIndex;
 extern symTableEntry *sym;

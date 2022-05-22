@@ -58,7 +58,7 @@
 
 [ \t\n]+                        { ; }
 
-.                               { yyerror("Unknown character"); }
+.                               { fprintf(stdout, "Invalid input: %s at line %d\n", yytext, yylineno); }
 
 %%
 int yywrap(void) {

@@ -240,7 +240,11 @@ void freeNode(nodeType *p) {
 }
 
 void yyerror(char *s) {
-  fprintf(stdout, "%s\n", s);
+  if (strcmp(s, "syntax error") == 0) {
+    fprintf(stdout, "Unexpected input or missing semicolon before line %d, Found %s\n", yylineno, yytext);
+  } else {
+    fprintf(stdout, "%s\n", s);
+  }
 }
 
 int main(void) {
