@@ -1,3 +1,2 @@
-- error handler
 - semantic errors
 - functions

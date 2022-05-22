@@ -181,7 +181,7 @@ nodeType *id(char *name, varType type, int intVal, double floatVal, char charVal
   }
 
   if (type != PK && locInSym != -1) {
-    // handle multiple declaration of same var
+    fprintf(stdout, "Line %d, Variable %s already declared before on line %d\n", yylineno, sym[locInSym].id.name, sym[locInSym].lineNo);
   }
 
   if (locInSym == -1 && type != PK) {
