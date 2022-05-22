@@ -121,10 +121,10 @@ int ex(nodeType *p) {
           break;
 
         case FUNCTION:
-          fprintf(fptr, "function\t%s:\n", p->opr.op[0]->id.name);
+          fprintf(fptr, "subroutine\t%s:\n", p->opr.op[0]->id.name);
           ex(p->opr.op[1]);
           fprintf(fptr, "\treturn\n");
-          fprintf(fptr, "end\tfunction\n");
+          fprintf(fptr, "end\tsubroutine\n");
           break;
 
         case 'f':
