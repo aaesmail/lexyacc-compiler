@@ -308,113 +308,108 @@ int searchForId(char *name) {
 
 void printVarType(varType type) {
   if (type == PK) {
-    printf("%s", "PK\t");
+    fprintf(symPtr, "%s", "PK");
   } else if (type == INT) {
-    printf("%s", "int\t");
+    fprintf(symPtr, "%s", "int");
   } else if (type == CHARAC) {
-    printf("%s", "char\t");
+    fprintf(symPtr, "%s", "char");
   } else if (type == FLOAT) {
-    printf("%s", "float\t");
+    fprintf(symPtr, "%s", "float");
   } else if (type == CONST_INT) {
-    printf("%s", "const_int");
+    fprintf(symPtr, "%s", "const_int");
   } else if (type == CONST_FLOAT) {
-    printf("%s", "const_float");
+    fprintf(symPtr, "%s", "const_float");
   } else if (type == CONST_CHAR) {
-    printf("%s", "const_char");
+    fprintf(symPtr, "%s", "const_char");
   } else if (type == FUNC) {
-    printf("%s", "function");
+    fprintf(symPtr, "%s", "function");
   } else {
-    printf("ERROR\t");
+    fprintf(symPtr, "ERROR");
   }
 }
 
 void printConstSym(conSymTable con) {
   if (con.type == INT) {
-    printf("%d", con.intVal);
+    fprintf(symPtr, "%d", con.intVal);
   } else if (con.type == CHARAC) {
-    printf("%c", con.charVal);
+    fprintf(symPtr, "%c", con.charVal);
   } else if (con.type == FLOAT) {
-    printf("%.6f", con.floatVal);
+    fprintf(symPtr, "%.6f", con.floatVal);
   } else {
-    printf("ERROR");
+    fprintf(symPtr, "ERROR");
   }
 }
 
 void printConstIdSym(idSymTable id) {
   if (id.type == CONST_INT) {
-    printf("%d", id.intVal);
+    fprintf(symPtr, "%d", id.intVal);
   } else if (id.type == CONST_CHAR) {
-    printf("%c", id.charVal);
+    fprintf(symPtr, "%c", id.charVal);
   } else if (id.type == CONST_FLOAT) {
-    printf("%.6f", id.floatVal);
+    fprintf(symPtr, "%.6f", id.floatVal);
   } else {
-    printf("NA");
+    fprintf(symPtr, "NA");
   }
 }
 
 void printSymTable() {
   int i;
 
-  printf("\n\t\t\t\t\t\t\tSymbol Table\n\n");
-  printf("\t\t\tLineNo\t\tType\t\tName\t\tVarType\t\tValue\n\n");
+  fprintf(symPtr, "[\n  { \"line\": 0, \"type\": \"whatever\", \"name\": \"whatever\", \"varType\": \"whatever\", \"value\": \"whatever\" }");
 
   for (i = 0; i < symTableIndex; i++) {
-    printf("\t\t\t");
-
-    printf("%d", sym[i].lineNo);
-
-    printf("\t\t");
+    fprintf(symPtr, ",\n  { \"line\": %d, \"type\": \"", sym[i].lineNo);
 
     if (sym[i].type == typeCon) {
-      printf("%s", "const");
+      fprintf(symPtr, "%s", "const");
     } else if (sym[i].type == typeId) {
-      printf("%s", "id");
+      fprintf(symPtr, "%s", "id");
     } else if (sym[i].type == typeOpr) {
-      printf("%s", "opr");
+      fprintf(symPtr, "%s", "opr");
     } else {
-      printf("ERROR");
+      fprintf(symPtr, "ERROR");
     }
 
-    printf("\t\t");
+    fprintf(symPtr, "\", \"name\": \"");
 
     if (sym[i].type == typeCon) {
-      printf("%s", "NA");
+      fprintf(symPtr, "%s", "NA");
     } else if (sym[i].type == typeId) {
-      printf("%s", sym[i].id.name);
+      fprintf(symPtr, "%s", sym[i].id.name);
     } else if (sym[i].type == typeOpr) {
-      printf("%s", sym[i].opr.name);
+      fprintf(symPtr, "%s", sym[i].opr.name);
     } else {
-      printf("ERROR");
+      fprintf(symPtr, "ERROR");
     }
 
-    printf("\t\t");
+    fprintf(symPtr, "\", \"varType\": \"");
 
     if (sym[i].type == typeCon) {
       printVarType(sym[i].con.type);
     } else if (sym[i].type == typeId) {
       printVarType(sym[i].id.type);
     } else if (sym[i].type == typeOpr) {
-      printf("%s", "NA\t");
+      fprintf(symPtr, "%s", "NA");
     } else {
-      printf("ERROR\t");
+      fprintf(symPtr, "ERROR");
     }
 
-    printf("\t");
+    fprintf(symPtr, "\", \"value\": \"");
 
     if (sym[i].type == typeCon) {
       printConstSym(sym[i].con);
     } else if (sym[i].type == typeId) {
       printConstIdSym(sym[i].id);
     } else if (sym[i].type == typeOpr) {
-      printf("%s", "NA");
+      fprintf(symPtr, "%s", "NA");
     } else {
-      printf("ERROR");
+      fprintf(symPtr, "ERROR");
     }
 
-    printf("\n");
+    fprintf(symPtr, "\" }");
   }
 
-  printf("\n");
+  fprintf(symPtr, "\n]\n");
 }
 
 void checkUnusedVariables() {
@@ -423,7 +418,7 @@ void checkUnusedVariables() {
   for (i = 0; i < symTableIndex; i++) {
     if (sym[i].type == typeId) {
       if (sym[i].id.used == 0) {
-        printf("\nWarning: Unused variable %s declared on line %d\n", sym[i].id.name, sym[i].lineNo);
+        fprintf(errPtr, ",\n  { \"line\": %d, \"description\": \"Unused variable %s\" }", sym[i].lineNo, sym[i].id.name);
       }
     }
   }
@@ -436,7 +431,7 @@ void handleAssignmentToConstantError(idNodeType id) {
     if (sym[i].type == typeId) {
       if (strcmp(id.name, sym[i].id.name) == 0) {
         if (sym[i].id.type == CONST_INT || sym[i].id.type == CONST_FLOAT || sym[i].id.type == CONST_CHAR) {
-          printf("\nError on line %d: Assignment to constant variable %s declared on line %d\n", yylineno, sym[i].id.name, sym[i].lineNo);
+          fprintf(errPtr, ",\n  { \"line\": %d, \"description\": \"Assignment to constant variable %s declared on line %d\" }", yylineno, sym[i].id.name, sym[i].lineNo);
         }
       }
     }
@@ -475,31 +470,31 @@ void handleTypesError(struct nodeTypeTag * left, struct nodeTypeTag * right) {
   varType rightType = getType(right);
 
   if (leftType != rightType) {
-    printf("\nError on line %d: Type mismatch between ", yylineno);
+    fprintf(errPtr, ",\n  { \"line\": %d, \"description\": \"Type mismatch between ", yylineno);
 
     if (leftType == INT) {
-      printf("int");
+      fprintf(errPtr, "int");
     } else if (leftType == CHARAC) {
-      printf("char");
+      fprintf(errPtr, "char");
     } else if (leftType == FLOAT) {
-      printf("float");
+      fprintf(errPtr, "float");
     } else {
       printf("[handleTypesError] UNKNOWN LEFT TYPE ERROR\n");
     }
 
-    printf(" and ");
+    fprintf(errPtr, " and ");
 
     if (rightType == INT) {
-      printf("int");
+      fprintf(errPtr, "int");
     } else if (rightType == CHARAC) {
-      printf("char");
+      fprintf(errPtr, "char");
     } else if (rightType == FLOAT) {
-      printf("float");
+      fprintf(errPtr, "float");
     } else {
       printf("[handleTypesError] UNKNOWN RIGHT TYPE ERROR\n");
     }
 
-    printf("\n");
+    fprintf(errPtr, "\" }");
   }
 }
 
@@ -511,12 +506,12 @@ void handleNegativeError(struct nodeTypeTag * node) {
   varType type = getType(node);
 
   if (type == CHARAC) {
-    printf("\nError on line %d: Cannot apply unary minus to char type\n", yylineno);
+    fprintf(errPtr, ",\n  { \"line\": %d, \"description\": \"Cannot apply unary minus to char type\" }", yylineno);
   }
 }
 
 void handleNotFunctionCallError(idNodeType node) {
   if (node.type != FUNC) {
-    printf("\nError on line %d: %s is not a function\n", yylineno, node.name);
+    fprintf(errPtr, ",\n  { \"line\": %d, \"description\": \"%s is not a function\" }", yylineno, node.name);
   }
 }

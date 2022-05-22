@@ -1,4 +1,3 @@
-- handle symbol table and error printing [json]
 - node server
 - Documentation
 

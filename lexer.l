@@ -59,7 +59,7 @@
 
 [ \t\n]+                        { ; }
 
-.                               { fprintf(stdout, "Invalid input: %s at line %d\n", yytext, yylineno); }
+.                               { fprintf(errPtr, ",\n  { \"line\": %d, \"description\": \"Invalid input: %s\" }", yylineno, yytext); }
 
 %%
 int yywrap(void) {

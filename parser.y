@@ -181,16 +181,16 @@ nodeType *id(char *name, varType type, int intVal, double floatVal, char charVal
   }
 
   if (type == PK && locInSym == -1) {
-    fprintf(stdout, "Line %d, variable %s not defined before\n", yylineno, name);
+    fprintf(errPtr, ",\n  { \"line\": %d, \"description\": \"Variable %s not defined before\" }", yylineno, name);
   }
 
   if (type != PK && locInSym != -1 && type != FUNC) {
-    fprintf(stdout, "Line %d, Variable %s already declared before on line %d\n", yylineno, sym[locInSym].id.name, sym[locInSym].lineNo);
+    fprintf(errPtr, ",\n  { \"line\": %d, \"description\": \"Variable %s already declared before on line %d\" }", yylineno, sym[locInSym].id.name, sym[locInSym].lineNo);
   }
 
   if (locInSym != -1 && type == PK) {
     if (sym[locInSym].id.init == 0 && init != 1) {
-      fprintf(stdout, "Line %d, Variable %s declared on line %d used before being initialized\n", yylineno, sym[locInSym].id.name, sym[locInSym].lineNo);
+      fprintf(errPtr, ",\n  { \"line\": %d, \"description\": \"Variable %s declared on line %d used before being initialized\" }", yylineno, sym[locInSym].id.name, sym[locInSym].lineNo);
     }
   }
 
@@ -254,30 +254,38 @@ void freeNode(nodeType *p) {
 
 void yyerror(char *s) {
   if (strcmp(s, "syntax error") == 0) {
-    fprintf(stdout, "Unexpected input or missing semicolon before line %d, Found %s\n", yylineno, yytext);
+    fprintf(errPtr, ",\n  { \"line\": %d, \"description\": \"Unexpected input or missing semicolon before line %d, Found %s instead\" }", yylineno, yylineno, yytext);
   } else {
-    fprintf(stdout, "%s\n", s);
+    fprintf(errPtr, ",\n  { \"line\": %d, \"description\": \"%s\" }", yylineno, s);
   }
 }
 
 int main(void) {
   fptr = fopen("./program.out", "w");
+  errPtr = fopen("./error.json", "w");
+  symPtr = fopen("./symbolTable.json", "w");
 
-  if (fptr == NULL) {
+  if (fptr == NULL || symPtr == NULL || errPtr == NULL) {
     printf("Couldn't open file!");
     exit(1);
   }
+
+  fprintf(errPtr, "[\n  { \"line\": 0, \"description\": \"whatever\" }");
 
   initSymTable();
 
   yyparse();
 
-  fclose(fptr);
-
   checkUnusedVariables();
 
   printSymTable();
   destroySymTable();
+
+  fprintf(errPtr, "\n]\n");
+
+  fclose(symPtr);
+  fclose(errPtr);
+  fclose(fptr);
 
   return 0;
 }
