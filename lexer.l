@@ -24,6 +24,7 @@
 "default"                       { return DEFAULT; }
 "break"                         { return BREAK; }
 "print"                         { return PRINT; }
+"function"                      { return FUNCTION; }
 
 "const_int"                     { return CONST_INT_TYPE; }
 "int"                           { return INT_TYPE; }

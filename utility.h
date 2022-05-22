@@ -1,5 +1,5 @@
 typedef enum { typeCon, typeId, typeOpr } nodeEnum;
-typedef enum { PK, INT, CHARAC, FLOAT, CONST_INT, CONST_FLOAT, CONST_CHAR } varType;
+typedef enum { PK, INT, CHARAC, FLOAT, CONST_INT, CONST_FLOAT, CONST_CHAR, FUNC } varType;
 
 // constant
 typedef struct {

@@ -1,8 +1,9 @@
-- functions
 - handle symbol table and error printing [json]
 - node server
 - Documentation
 
 BONUS so far:
+- functions
+- Detect call not a function error
 - Detect assignment to constant error
-- Detect variables used before declaration
+- Detect variables used before declaration error

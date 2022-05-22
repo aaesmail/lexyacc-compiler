@@ -14,6 +14,7 @@ void writeId(idNodeType id);
 void handleAssignmentToConstantError(idNodeType id);
 void handleTypesError(struct nodeTypeTag * left, struct nodeTypeTag * right);
 void handleNegativeError(struct nodeTypeTag * node);
+void handleNotFunctionCallError(idNodeType node);
 
 int ex(nodeType *p) {
   int lbl1, lbl2;
@@ -117,6 +118,18 @@ int ex(nodeType *p) {
           handleNegativeError(p->opr.op[0]);
           ex(p->opr.op[0]);
           fprintf(fptr, "\tneg\n");
+          break;
+
+        case FUNCTION:
+          fprintf(fptr, "function\t%s:\n", p->opr.op[0]->id.name);
+          ex(p->opr.op[1]);
+          fprintf(fptr, "\treturn\n");
+          fprintf(fptr, "end\tfunction\n");
+          break;
+
+        case 'f':
+          handleNotFunctionCallError(p->opr.op[0]->id);
+          fprintf(fptr, "\tcall\t%s\n", p->opr.op[0]->id.name);
           break;
 
         default:
@@ -308,6 +321,8 @@ void printVarType(varType type) {
     printf("%s", "const_float");
   } else if (type == CONST_CHAR) {
     printf("%s", "const_char");
+  } else if (type == FUNC) {
+    printf("%s", "function");
   } else {
     printf("ERROR\t");
   }
@@ -497,5 +512,11 @@ void handleNegativeError(struct nodeTypeTag * node) {
 
   if (type == CHARAC) {
     printf("\nError on line %d: Cannot apply unary minus to char type\n", yylineno);
+  }
+}
+
+void handleNotFunctionCallError(idNodeType node) {
+  if (node.type != FUNC) {
+    printf("\nError on line %d: %s is not a function\n", yylineno, node.name);
   }
 }

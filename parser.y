@@ -39,7 +39,7 @@
 %token <cValue> CHARACTER
 %token <fValue> FLOAT_NUM
 %token <sIndex> VARIABLE
-%token DO WHILE IF SWITCH CASE DEFAULT BREAK PRINT CONST_INT_TYPE INT_TYPE CONST_FLOAT_TYPE FLOAT_TYPE CONST_CHAR_TYPE CHAR_TYPE
+%token DO WHILE IF SWITCH CASE DEFAULT BREAK PRINT FUNCTION CONST_INT_TYPE INT_TYPE CONST_FLOAT_TYPE FLOAT_TYPE CONST_CHAR_TYPE CHAR_TYPE
 %nonassoc IFX
 %nonassoc ELSE
 
@@ -77,6 +77,7 @@ stmt:
             | IF '(' expr ')' stmt %prec IFX  { $$ = opr(IF, 2, $3, $5); addOprToSymTable("if", yylineno); }
             | IF '(' expr ')' stmt ELSE stmt  { $$ = opr(IF, 3, $3, $5, $7); addOprToSymTable("if else", yylineno); }
             | SWITCH { addOprToSymTable("switch", yylineno); } '(' VARIABLE ')' '{' switch_body '}' { $$ = opr(SWITCH, 2, id($4, PK, 0, 0.5, '0', 0), $7); }
+            | FUNCTION VARIABLE { addIdToSymTable(yytext, FUNC, yylineno, 0, 0.5, '0'); } stmt { $$ = opr(FUNCTION, 2, id($2, FUNC, 0, 0.5, '0', 1), $4); }
             | '{' stmt_list '}'               { $$ = $2; }
             ;
 
@@ -100,6 +101,7 @@ expr:
             | CHARACTER                       { $$ = con(0, $1, 0.5, CHARAC); }
             | FLOAT_NUM                       { $$ = con(0, '0', $1, FLOAT); }
             | VARIABLE                        { $$ = id($1, PK, 0, 0.5, '0', 0); }
+            | VARIABLE '(' ')'                { $$ = opr('f', 1, id($1, PK, 0, 0.5, '0', 0)); }
             | '-' { addOprToSymTable("negative", yylineno); } expr %prec UMINUS           { $$ = opr(UMINUS, 1, $3); }
             | expr '+' { addOprToSymTable("add", yylineno); } expr                   { $$ = opr('+', 2, $1, $4); }
             | expr '-' { addOprToSymTable("sub", yylineno); } expr                   { $$ = opr('-', 2, $1, $4); }
@@ -182,7 +184,7 @@ nodeType *id(char *name, varType type, int intVal, double floatVal, char charVal
     fprintf(stdout, "Line %d, variable %s not defined before\n", yylineno, name);
   }
 
-  if (type != PK && locInSym != -1) {
+  if (type != PK && locInSym != -1 && type != FUNC) {
     fprintf(stdout, "Line %d, Variable %s already declared before on line %d\n", yylineno, sym[locInSym].id.name, sym[locInSym].lineNo);
   }
 
