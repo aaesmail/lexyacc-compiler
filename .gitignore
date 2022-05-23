@@ -4,4 +4,6 @@ lex.yy.c
 y.tab.c
 y.tab.h
 *.out
-*.json
+error.json
+symbolTable.json
+node_modules
