@@ -8,3 +8,4 @@ error.json
 symbolTable.json
 node_modules
 build
+input.program
