@@ -5,12 +5,11 @@
   "main": "main.js",
   "scripts": {
     "start": "concurrently \"npm run dev:react\" \"npm run dev:electron\"",
-    "build": "",
     "dev:react": "webpack --config webpack.common.js --watch",
     "dev:electron": "electron ."
   },
   "keywords": [],
-  "author": "",
+  "author": "Ali Adel",
   "license": "ISC",
   "dependencies": {
     "electron": "^18.2.4",
