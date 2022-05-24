@@ -14,5 +14,12 @@
   textarea {
     margin-bottom: 35px;
     resize: none;
+    border: 1px solid #888;
+    border-radius: 8px;
+    padding: 8px;
+
+    &:focus {
+      outline: 1px solid #cef;
+    }
   }
 }
