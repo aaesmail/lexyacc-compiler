@@ -23,4 +23,4 @@ const Input = ({ compile }) => {
   );
 };
 
-export default Input;
+export default React.memo(Input);

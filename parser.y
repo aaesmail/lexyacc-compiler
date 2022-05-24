@@ -254,7 +254,7 @@ void freeNode(nodeType *p) {
 
 void yyerror(char *s) {
   if (strcmp(s, "syntax error") == 0) {
-    fprintf(errPtr, ",\n  { \"line\": %d, \"description\": \"Unexpected input or missing semicolon before line %d, Found %s instead\" }", yylineno, yylineno, yytext);
+    fprintf(errPtr, ",\n  { \"line\": %d, \"description\": \"Unexpected input or missing semicolon around line %d\" }", yylineno, yylineno);
   } else {
     fprintf(errPtr, ",\n  { \"line\": %d, \"description\": \"%s\" }", yylineno, s);
   }
