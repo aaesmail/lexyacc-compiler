@@ -8,9 +8,11 @@ import Table from '../Table/Table';
 const Output = ({ back, code, compiledCode, symbolTable, errors }) => {
   return (
     <div className='output__container'>
-      <a className='next round' onClick={back}>
-        &laquo; Back
-      </a>
+      <div className='header'>
+        <a className='next round' onClick={back}>
+          &laquo; Back
+        </a>
+      </div>
 
       {symbolTable.length > 0 && <Table title={'Symbol Table'} table={symbolTable} />}
 

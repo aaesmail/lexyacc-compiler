@@ -1,8 +1,4 @@
 .vscode
-*.exe
-lex.yy.c
-y.tab.c
-y.tab.h
 *.out
 error.json
 symbolTable.json
