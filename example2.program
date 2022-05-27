@@ -1,6 +1,42 @@
+function abc {
+  int jcv;
+  jcv = 1;
+}
+
+abc();
+
+int ybc;
+char k;
 int x;
 int y;
-x = 5;
+int i;
+int c;
+int mjd;
+const_int hjk = 5;
+const_float m = 1.5;
+const_char j = 'c';
+ybc = 5;
+x = 3;
+y = 3;
+x + y;
+k = 'g';
+c = 1.5 + 3.0;
+
+jklasd();
+
+i = 0;
+
+j = 5;
+
+while (i < 5) {
+  print i;
+  i = i + 1;
+}
+
+do {
+  print i;
+  i = i - 1;
+} while(i > 0);
 
 switch (x) {
   case 5:
@@ -8,17 +44,13 @@ switch (x) {
     break;
   
   case 6:
-    switch (y) {
-      case 5:
-        print x;
-        break;
-      case 6:
-        print y;
-        break;
-    }
+    print y;
     break;
   
   default:
     print x + y;
     break;
 }
+
+int bla;
+bla = j;

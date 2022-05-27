@@ -126,7 +126,6 @@ int ex(nodeType *p, idNodeType switchVar, int switchLbl) {
         case FUNCTION:
           fprintf(fptr, "subroutine\t%s:\n", p->opr.op[0]->id.name);
           ex(p->opr.op[1], switchVar, switchLbl);
-          fprintf(fptr, "\treturn\n");
           fprintf(fptr, "end\tsubroutine\n");
           break;
 
