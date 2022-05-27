@@ -90,7 +90,7 @@
     void checkUnusedVariables();
     int searchForId(char *name);
     void freeNode(nodeType *p);
-    int ex(nodeType *p);
+    int ex(nodeType *p, idNodeType switchVar, int switchLbl);
     int yylex(void);
     void yyerror(char *s);
     int symTableSize;
@@ -1547,7 +1547,7 @@ yyreduce:
 
 /* Line 1455 of yacc.c  */
 #line 60 "parser.y"
-    { ex((yyvsp[(2) - (2)].nPtr)); freeNode((yyvsp[(2) - (2)].nPtr)); }
+    { ex((yyvsp[(2) - (2)].nPtr), dummyVal, 0); freeNode((yyvsp[(2) - (2)].nPtr)); }
     break;
 
   case 5:

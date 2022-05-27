@@ -89,3 +89,5 @@ extern char *yytext;
 extern int symTableSize;
 extern int symTableIndex;
 extern symTableEntry *sym;
+
+idNodeType dummyVal;

@@ -6,9 +6,6 @@
 
 static int lbl;
 
-static idNodeType switchVar;
-static int switchLbl;
-
 void printConstant(conNodeType con);
 void writeId(idNodeType id);
 void handleAssignmentToConstantError(idNodeType id);
@@ -16,7 +13,7 @@ void handleTypesError(struct nodeTypeTag * left, struct nodeTypeTag * right);
 void handleNegativeError(struct nodeTypeTag * node);
 void handleNotFunctionCallError(idNodeType node);
 
-int ex(nodeType *p) {
+int ex(nodeType *p, idNodeType switchVar, int switchLbl) {
   int lbl1, lbl2;
 
   if (!p) return 0;
@@ -48,32 +45,32 @@ int ex(nodeType *p) {
       switch(p->opr.oper) {
         case DO:
           fprintf(fptr, "L%03d:\n", lbl1 = lbl++);
-          ex(p->opr.op[0]);
-          ex(p->opr.op[1]);
+          ex(p->opr.op[0], switchVar, switchLbl);
+          ex(p->opr.op[1], switchVar, switchLbl);
           fprintf(fptr, "\tjnz\tL%03d\n", lbl1);
           break;
 
         case WHILE:
           fprintf(fptr, "L%03d:\n", lbl1 = lbl++);
-          ex(p->opr.op[0]);
+          ex(p->opr.op[0], switchVar, switchLbl);
           fprintf(fptr, "\tjz\tL%03d\n", lbl2 = lbl++);
-          ex(p->opr.op[1]);
+          ex(p->opr.op[1], switchVar, switchLbl);
           fprintf(fptr, "\tjmp\tL%03d\n", lbl1);
           fprintf(fptr, "L%03d:\n", lbl2);
           break;
 
         case IF:
-          ex(p->opr.op[0]);
+          ex(p->opr.op[0], switchVar, switchLbl);
           if (p->opr.nops > 2) {
             fprintf(fptr, "\tjz\tL%03d\n", lbl1 = lbl++);
-            ex(p->opr.op[1]);
+            ex(p->opr.op[1], switchVar, switchLbl);
             fprintf(fptr, "\tjmp\tL%03d\n", lbl2 = lbl++);
             fprintf(fptr, "L%03d:\n", lbl1);
-            ex(p->opr.op[2]);
+            ex(p->opr.op[2], switchVar, switchLbl);
             fprintf(fptr, "L%03d:\n", lbl2);
           } else {
             fprintf(fptr, "\tjz\tL%03d\n", lbl1 = lbl++);
-            ex(p->opr.op[1]);
+            ex(p->opr.op[1], switchVar, switchLbl);
             fprintf(fptr, "L%03d:\n", lbl1);
           }
           break;
@@ -81,12 +78,12 @@ int ex(nodeType *p) {
         case SWITCH:
           switchVar = p->opr.op[0]->id;
           switchLbl = lbl++;
-          ex(p->opr.op[1]);
+          ex(p->opr.op[1], switchVar, switchLbl);
           fprintf(fptr, "L%03d:\n", switchLbl);
           break;
 
         case CASE:
-          ex(p->opr.op[0]);
+          ex(p->opr.op[0], switchVar, switchLbl);
           fprintf(fptr, "\tpush\t");
           writeId(switchVar);
           fprintf(fptr, "\n");
@@ -94,24 +91,24 @@ int ex(nodeType *p) {
           fprintf(fptr, "\tpop\tR1\n");
           fprintf(fptr, "\tcmpEQ\tR0,\tR1\n");
           fprintf(fptr, "\tjz\tL%03d\n", lbl1 = lbl++);
-          ex(p->opr.op[1]);
+          ex(p->opr.op[1], switchVar, switchLbl);
           fprintf(fptr, "\tjmp\tL%03d\n", switchLbl);
           fprintf(fptr, "L%03d:\n", lbl1);
           break;
 
         case DEFAULT:
-          ex(p->opr.op[0]);
+          ex(p->opr.op[0], switchVar, switchLbl);
           fprintf(fptr, "\tjmp\tL%03d\n", switchLbl);
           break;
 
         case PRINT:
-          ex(p->opr.op[0]);
+          ex(p->opr.op[0], switchVar, switchLbl);
           fprintf(fptr, "\tpop\tR0\n");
           fprintf(fptr, "\tprint\tR0\n");
           break;
 
         case '=':
-          ex(p->opr.op[1]);
+          ex(p->opr.op[1], switchVar, switchLbl);
           handleAssignmentToConstantError(p->opr.op[0]->id);
           handleTypesError(p->opr.op[0], p->opr.op[1]);
           fprintf(fptr, "\tpop\t%s\n", p->opr.op[0]->id.name);
@@ -119,7 +116,7 @@ int ex(nodeType *p) {
 
         case UMINUS:
           handleNegativeError(p->opr.op[0]);
-          ex(p->opr.op[0]);
+          ex(p->opr.op[0], switchVar, switchLbl);
           fprintf(fptr, "\tpop\tR0\n");
           fprintf(fptr, "\tneg\tR0,\tR1\n");
           fprintf(fptr, "\tpush\tR1\n");
@@ -127,7 +124,7 @@ int ex(nodeType *p) {
 
         case FUNCTION:
           fprintf(fptr, "subroutine\t%s:\n", p->opr.op[0]->id.name);
-          ex(p->opr.op[1]);
+          ex(p->opr.op[1], switchVar, switchLbl);
           fprintf(fptr, "\treturn\n");
           fprintf(fptr, "end\tsubroutine\n");
           break;
@@ -139,8 +136,8 @@ int ex(nodeType *p) {
 
         default:
           handleTypesError(p->opr.op[0], p->opr.op[1]);
-          ex(p->opr.op[0]);
-          ex(p->opr.op[1]);
+          ex(p->opr.op[0], switchVar, switchLbl);
+          ex(p->opr.op[1], switchVar, switchLbl);
 
           switch(p->opr.oper) {
             case '+':

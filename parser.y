@@ -19,7 +19,7 @@
     void checkUnusedVariables();
     int searchForId(char *name);
     void freeNode(nodeType *p);
-    int ex(nodeType *p);
+    int ex(nodeType *p, idNodeType switchVar, int switchLbl);
     int yylex(void);
     void yyerror(char *s);
     int symTableSize;
@@ -57,7 +57,7 @@ program:
             ;
 
 function:
-              function stmt                   { ex($2); freeNode($2); }
+              function stmt                   { ex($2, dummyVal, 0); freeNode($2); }
             | /* NULL */
             ;
 
