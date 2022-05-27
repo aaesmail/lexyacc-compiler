@@ -27,9 +27,10 @@ int ex(nodeType *p, idNodeType switchVar, int switchLbl) {
 
     case typeId:
       if (p->id.used == 1) {
-        fprintf(fptr, "\tpush\t");
+        fprintf(fptr, "\tmov\t");
         writeId(p->id);
-        fprintf(fptr, "\n");
+        fprintf(fptr, ",\tR0\n");
+        fprintf(fptr, "\tpush\tR0\n");
       } else {
         if (p->id.type == INT) {
           fprintf(fptr, "\tvar\t%s\t4\n", p->id.name);
@@ -84,10 +85,9 @@ int ex(nodeType *p, idNodeType switchVar, int switchLbl) {
 
         case CASE:
           ex(p->opr.op[0], switchVar, switchLbl);
-          fprintf(fptr, "\tpush\t");
+          fprintf(fptr, "\tmov\t");
           writeId(switchVar);
-          fprintf(fptr, "\n");
-          fprintf(fptr, "\tpop\tR0\n");
+          fprintf(fptr, ",\tR0\n");
           fprintf(fptr, "\tpop\tR1\n");
           fprintf(fptr, "\tcmpEQ\tR0,\tR1\n");
           fprintf(fptr, "\tjz\tL%03d\n", lbl1 = lbl++);
@@ -111,7 +111,8 @@ int ex(nodeType *p, idNodeType switchVar, int switchLbl) {
           ex(p->opr.op[1], switchVar, switchLbl);
           handleAssignmentToConstantError(p->opr.op[0]->id);
           handleTypesError(p->opr.op[0], p->opr.op[1]);
-          fprintf(fptr, "\tpop\t%s\n", p->opr.op[0]->id.name);
+          fprintf(fptr, "\tpop\tR0\n");
+          fprintf(fptr, "\tmov\tR0,\t%s\n", p->opr.op[0]->id.name);
           break;
 
         case UMINUS:
