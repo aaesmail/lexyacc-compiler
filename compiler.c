@@ -90,7 +90,9 @@ int ex(nodeType *p) {
           fprintf(fptr, "\tpush\t");
           writeId(switchVar);
           fprintf(fptr, "\n");
-          fprintf(fptr, "\tcmpEQ\n");
+          fprintf(fptr, "\tpop\tR0\n");
+          fprintf(fptr, "\tpop\tR1\n");
+          fprintf(fptr, "\tcmpEQ\tR0,\tR1\n");
           fprintf(fptr, "\tjz\tL%03d\n", lbl1 = lbl++);
           ex(p->opr.op[1]);
           fprintf(fptr, "\tjmp\tL%03d\n", switchLbl);
@@ -104,7 +106,8 @@ int ex(nodeType *p) {
 
         case PRINT:
           ex(p->opr.op[0]);
-          fprintf(fptr, "\tprint\n");
+          fprintf(fptr, "\tpop\tR0\n");
+          fprintf(fptr, "\tprint\tR0\n");
           break;
 
         case '=':
@@ -117,7 +120,9 @@ int ex(nodeType *p) {
         case UMINUS:
           handleNegativeError(p->opr.op[0]);
           ex(p->opr.op[0]);
-          fprintf(fptr, "\tneg\n");
+          fprintf(fptr, "\tpop\tR0\n");
+          fprintf(fptr, "\tneg\tR0,\tR1\n");
+          fprintf(fptr, "\tpush\tR1\n");
           break;
 
         case FUNCTION:
@@ -139,43 +144,67 @@ int ex(nodeType *p) {
 
           switch(p->opr.oper) {
             case '+':
-              fprintf(fptr, "\tadd\n");
+              fprintf(fptr, "\tpop\tR0\n");
+              fprintf(fptr, "\tpop\tR1\n");
+              fprintf(fptr, "\tadd\tR0,\tR1,\tR2\n");
+              fprintf(fptr, "\tpush\tR2\n");
               break;
 
             case '-':
-              fprintf(fptr, "\tsub\n");
+              fprintf(fptr, "\tpop\tR0\n");
+              fprintf(fptr, "\tpop\tR1\n");
+              fprintf(fptr, "\tsub\tR0,\tR1,\tR2\n");
+              fprintf(fptr, "\tpush\tR2\n");
               break;
 
             case '*':
-              fprintf(fptr, "\tmul\n");
+              fprintf(fptr, "\tpop\tR0\n");
+              fprintf(fptr, "\tpop\tR1\n");
+              fprintf(fptr, "\tmul\tR0,\tR1,\tR2\n");
+              fprintf(fptr, "\tpush\tR2\n");
               break;
 
             case '/':
-              fprintf(fptr, "\tdiv\n");
+              fprintf(fptr, "\tpop\tR0\n");
+              fprintf(fptr, "\tpop\tR1\n");
+              fprintf(fptr, "\tdiv\tR0,\tR1,\tR2\n");
+              fprintf(fptr, "\tpush\tR2\n");
               break;
 
             case '<':
-              fprintf(fptr, "\tcmpLT\n");
+              fprintf(fptr, "\tpop\tR0\n");
+              fprintf(fptr, "\tpop\tR1\n");
+              fprintf(fptr, "\tcmpLT\tR0,\tR1\n");
               break;
 
             case '>':
-              fprintf(fptr, "\tcmpGT\n");
+              fprintf(fptr, "\tpop\tR0\n");
+              fprintf(fptr, "\tpop\tR1\n");
+              fprintf(fptr, "\tcmpGT\tR0,\tR1\n");
               break;
 
             case GE:
-              fprintf(fptr, "\tcmpGE\n");
+              fprintf(fptr, "\tpop\tR0\n");
+              fprintf(fptr, "\tpop\tR1\n");
+              fprintf(fptr, "\tcmpGE\tR0,\tR1\n");
               break;
 
             case LE:
-              fprintf(fptr, "\tcmpLE\n");
+              fprintf(fptr, "\tpop\tR0\n");
+              fprintf(fptr, "\tpop\tR1\n");
+              fprintf(fptr, "\tcmpLE\tR0,\tR1\n");
               break;
 
             case NE:
-              fprintf(fptr, "\tcmpNE\n");
+              fprintf(fptr, "\tpop\tR0\n");
+              fprintf(fptr, "\tpop\tR1\n");
+              fprintf(fptr, "\tcmpNE\tR0,\tR1\n");
               break;
 
             case EQ:
-              fprintf(fptr, "\tcmpEQ\n");
+              fprintf(fptr, "\tpop\tR0\n");
+              fprintf(fptr, "\tpop\tR1\n");
+              fprintf(fptr, "\tcmpEQ\tR0,\tR1\n");
               break;
           }
       }

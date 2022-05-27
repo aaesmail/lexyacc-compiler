@@ -1,6 +1,3 @@
-- node server
-- Documentation
-
 BONUS so far:
 - functions
 - Detect call not a function error
