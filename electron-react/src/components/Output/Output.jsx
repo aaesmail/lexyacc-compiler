@@ -18,9 +18,9 @@ const Output = ({ back, code, compiledCode, symbolTable, errors }) => {
 
       {errors.length > 0 && <Table title={'Errors'} table={errors} />}
 
-      {compiledCode && <Code title='Compiled Code' code={compiledCode} />}
-
       {code && <Code title='Input Code' code={code} />}
+
+      {compiledCode && <Code title='Compiled Code' code={compiledCode} />}
     </div>
   );
 };

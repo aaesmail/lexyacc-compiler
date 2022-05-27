@@ -89,7 +89,7 @@ int ex(nodeType *p, idNodeType switchVar, int switchLbl) {
           writeId(switchVar);
           fprintf(fptr, ",\tR0\n");
           fprintf(fptr, "\tpop\tR1\n");
-          fprintf(fptr, "\tcmpEQ\tR0,\tR1\n");
+          fprintf(fptr, "\tcmpEQ\tR1,\tR0\n");
           fprintf(fptr, "\tjz\tL%03d\n", lbl1 = lbl++);
           ex(p->opr.op[1], switchVar, switchLbl);
           fprintf(fptr, "\tjmp\tL%03d\n", switchLbl);
@@ -150,7 +150,7 @@ int ex(nodeType *p, idNodeType switchVar, int switchLbl) {
             case '-':
               fprintf(fptr, "\tpop\tR0\n");
               fprintf(fptr, "\tpop\tR1\n");
-              fprintf(fptr, "\tsub\tR0,\tR1,\tR2\n");
+              fprintf(fptr, "\tsub\tR1,\tR0,\tR2\n");
               fprintf(fptr, "\tpush\tR2\n");
               break;
 
@@ -164,44 +164,44 @@ int ex(nodeType *p, idNodeType switchVar, int switchLbl) {
             case '/':
               fprintf(fptr, "\tpop\tR0\n");
               fprintf(fptr, "\tpop\tR1\n");
-              fprintf(fptr, "\tdiv\tR0,\tR1,\tR2\n");
+              fprintf(fptr, "\tdiv\tR1,\tR0,\tR2\n");
               fprintf(fptr, "\tpush\tR2\n");
               break;
 
             case '<':
               fprintf(fptr, "\tpop\tR0\n");
               fprintf(fptr, "\tpop\tR1\n");
-              fprintf(fptr, "\tcmpLT\tR0,\tR1\n");
+              fprintf(fptr, "\tcmpLT\tR1,\tR0\n");
               break;
 
             case '>':
               fprintf(fptr, "\tpop\tR0\n");
               fprintf(fptr, "\tpop\tR1\n");
-              fprintf(fptr, "\tcmpGT\tR0,\tR1\n");
+              fprintf(fptr, "\tcmpGT\tR1,\tR0\n");
               break;
 
             case GE:
               fprintf(fptr, "\tpop\tR0\n");
               fprintf(fptr, "\tpop\tR1\n");
-              fprintf(fptr, "\tcmpGE\tR0,\tR1\n");
+              fprintf(fptr, "\tcmpGE\tR1,\tR0\n");
               break;
 
             case LE:
               fprintf(fptr, "\tpop\tR0\n");
               fprintf(fptr, "\tpop\tR1\n");
-              fprintf(fptr, "\tcmpLE\tR0,\tR1\n");
+              fprintf(fptr, "\tcmpLE\tR1,\tR0\n");
               break;
 
             case NE:
               fprintf(fptr, "\tpop\tR0\n");
               fprintf(fptr, "\tpop\tR1\n");
-              fprintf(fptr, "\tcmpNE\tR0,\tR1\n");
+              fprintf(fptr, "\tcmpNE\tR1,\tR0\n");
               break;
 
             case EQ:
               fprintf(fptr, "\tpop\tR0\n");
               fprintf(fptr, "\tpop\tR1\n");
-              fprintf(fptr, "\tcmpEQ\tR0,\tR1\n");
+              fprintf(fptr, "\tcmpEQ\tR1,\tR0\n");
               break;
           }
       }
