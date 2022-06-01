@@ -8,6 +8,11 @@ Run:
 - gcc lex.yy.c y.tab.c -o compiler.exe
 - feed a C program to the compiler.exe through stdin
 
+Run (GUI):
+- Have node installed
+- Open a terminal inside the electron-react folder
+- npm install
+- npm start
 
 If you have a windows machine:
 - Install flex and bison and add them to environment variables
