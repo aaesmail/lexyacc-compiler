@@ -18,6 +18,7 @@ const Input = ({ compile }) => {
         onChange={(event) => setCode(event.target.value)}
         cols='100'
         rows='35'
+        spellcheck='false'
       ></textarea>
     </div>
   );
