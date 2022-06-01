@@ -1,0 +1,71 @@
+function fun {
+  float bar;
+  float baz;
+  float res;
+
+  bar = 1.5;
+  baz = 2.4;
+
+  res = bar * baz - 2.3;
+}
+
+int x;
+int y;
+int z;
+const_int foo = 5;
+const_float ka = 1.5;
+const_char jac = 'a';
+float temp;
+temp = ka - 2.3;
+
+fun();
+
+x = 3 + foo;
+y = 2;
+z = 2 * x + 5 * y - 3;
+
+if (x < z) {
+  y = 5;
+  print y;
+} else {
+  y = 6;
+  print y;
+}
+
+int i;
+i = 0;
+
+while (i < 10) {
+  print i;
+  i = i + 1;
+}
+
+i = 0;
+
+do {
+  print i;
+  i = i + 1;
+} while(i < 20);
+
+int j;
+
+for (j = 0; j < 5; j = j + 1;) {
+  print j;
+}
+
+char fa;
+fa = 'b';
+
+switch (fa) {
+  case jac:
+    print jac;
+    break;
+
+  case 'b':
+    print 'b';
+    break;
+
+  default:
+    print 'c';
+    break;
+}

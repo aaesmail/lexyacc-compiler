@@ -45,26 +45,27 @@
      VARIABLE = 261,
      DO = 262,
      WHILE = 263,
-     IF = 264,
-     SWITCH = 265,
-     CASE = 266,
-     DEFAULT = 267,
-     BREAK = 268,
-     PRINT = 269,
-     FUNCTION = 270,
-     CONST_INT_TYPE = 271,
-     INT_TYPE = 272,
-     CONST_FLOAT_TYPE = 273,
-     FLOAT_TYPE = 274,
-     CONST_CHAR_TYPE = 275,
-     CHAR_TYPE = 276,
-     IFX = 277,
-     ELSE = 278,
-     NE = 279,
-     EQ = 280,
-     LE = 281,
-     GE = 282,
-     UMINUS = 283
+     FOR = 264,
+     IF = 265,
+     SWITCH = 266,
+     CASE = 267,
+     DEFAULT = 268,
+     BREAK = 269,
+     PRINT = 270,
+     FUNCTION = 271,
+     CONST_INT_TYPE = 272,
+     INT_TYPE = 273,
+     CONST_FLOAT_TYPE = 274,
+     FLOAT_TYPE = 275,
+     CONST_CHAR_TYPE = 276,
+     CHAR_TYPE = 277,
+     IFX = 278,
+     ELSE = 279,
+     NE = 280,
+     EQ = 281,
+     LE = 282,
+     GE = 283,
+     UMINUS = 284
    };
 #endif
 /* Tokens.  */
@@ -74,26 +75,27 @@
 #define VARIABLE 261
 #define DO 262
 #define WHILE 263
-#define IF 264
-#define SWITCH 265
-#define CASE 266
-#define DEFAULT 267
-#define BREAK 268
-#define PRINT 269
-#define FUNCTION 270
-#define CONST_INT_TYPE 271
-#define INT_TYPE 272
-#define CONST_FLOAT_TYPE 273
-#define FLOAT_TYPE 274
-#define CONST_CHAR_TYPE 275
-#define CHAR_TYPE 276
-#define IFX 277
-#define ELSE 278
-#define NE 279
-#define EQ 280
-#define LE 281
-#define GE 282
-#define UMINUS 283
+#define FOR 264
+#define IF 265
+#define SWITCH 266
+#define CASE 267
+#define DEFAULT 268
+#define BREAK 269
+#define PRINT 270
+#define FUNCTION 271
+#define CONST_INT_TYPE 272
+#define INT_TYPE 273
+#define CONST_FLOAT_TYPE 274
+#define FLOAT_TYPE 275
+#define CONST_CHAR_TYPE 276
+#define CHAR_TYPE 277
+#define IFX 278
+#define ELSE 279
+#define NE 280
+#define EQ 281
+#define LE 282
+#define GE 283
+#define UMINUS 284
 
 
 
@@ -114,7 +116,7 @@ typedef union YYSTYPE
 
 
 /* Line 1676 of yacc.c  */
-#line 118 "y.tab.h"
+#line 120 "y.tab.h"
 } YYSTYPE;
 # define YYSTYPE_IS_TRIVIAL 1
 # define yystype YYSTYPE /* obsolescent; will be withdrawn */

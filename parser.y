@@ -39,7 +39,7 @@
 %token <cValue> CHARACTER
 %token <fValue> FLOAT_NUM
 %token <sIndex> VARIABLE
-%token DO WHILE IF SWITCH CASE DEFAULT BREAK PRINT FUNCTION CONST_INT_TYPE INT_TYPE CONST_FLOAT_TYPE FLOAT_TYPE CONST_CHAR_TYPE CHAR_TYPE
+%token DO WHILE FOR IF SWITCH CASE DEFAULT BREAK PRINT FUNCTION CONST_INT_TYPE INT_TYPE CONST_FLOAT_TYPE FLOAT_TYPE CONST_CHAR_TYPE CHAR_TYPE
 %nonassoc IFX
 %nonassoc ELSE
 
@@ -74,6 +74,7 @@ stmt:
             | VARIABLE '=' { addOprToSymTable("assign", yylineno); } expr ';'           { $$ = opr('=', 2, id($1, PK, 0, 0.5, '0', 1), $4); }
             | DO { addOprToSymTable("do while", yylineno); } stmt WHILE '(' expr ')' ';'  { $$ = opr(DO, 2, $3, $6); }
             | WHILE { addOprToSymTable("while", yylineno); } '(' expr ')' stmt         { $$ = opr(WHILE, 2, $4, $6); }
+            | FOR { addOprToSymTable("for", yylineno); } '(' stmt expr ';' stmt ')' stmt    { $$ = opr(FOR, 4, $4, $5, $7, $9); }
             | IF '(' expr ')' stmt %prec IFX  { $$ = opr(IF, 2, $3, $5); addOprToSymTable("if", yylineno); }
             | IF '(' expr ')' stmt ELSE stmt  { $$ = opr(IF, 3, $3, $5, $7); addOprToSymTable("if else", yylineno); }
             | SWITCH { addOprToSymTable("switch", yylineno); } '(' VARIABLE ')' '{' switch_body '}' { $$ = opr(SWITCH, 2, id($4, PK, 0, 0.5, '0', 0), $7); }
@@ -169,14 +170,14 @@ nodeType *id(char *name, varType type, int intVal, double floatVal, char charVal
 
   locInSym = searchForId(name);
 
-  if (type == PK) {
+  if (type == PK && init != 1) {
     p->id.used = 1;
   } else {
     p->id.used = 0;
     p->id.init = 0;
   }
 
-  if (locInSym != -1 && type == PK) {
+  if (locInSym != -1 && type == PK && init != 1) {
     sym[locInSym].id.used = 1;
   }
 

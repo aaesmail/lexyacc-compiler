@@ -17,6 +17,7 @@
 "!="                            { return NE; }
 "do"                            { return DO; }
 "while"                         { return WHILE; }
+"for"                           { return FOR; }
 "if"                            { return IF; }
 "else"                          { return ELSE; }
 "switch"                        { return SWITCH; }

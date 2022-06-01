@@ -60,6 +60,17 @@ int ex(nodeType *p, idNodeType switchVar, int switchLbl) {
           fprintf(fptr, "L%03d:\n", lbl2);
           break;
 
+        case FOR:
+          ex(p->opr.op[0], switchVar, switchLbl);
+          fprintf(fptr, "L%03d:\n", lbl1 = lbl++);
+          ex(p->opr.op[1], switchVar, switchLbl);
+          fprintf(fptr, "\tjz\tL%03d\n", lbl2 = lbl++);
+          ex(p->opr.op[3], switchVar, switchLbl);
+          ex(p->opr.op[2], switchVar, switchLbl);
+          fprintf(fptr, "\tjmp\tL%03d\n", lbl1);
+          fprintf(fptr, "L%03d:\n", lbl2);
+          break;
+
         case IF:
           ex(p->opr.op[0], switchVar, switchLbl);
           if (p->opr.nops > 2) {
